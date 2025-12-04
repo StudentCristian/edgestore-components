@@ -9,7 +9,7 @@ npm install ../test-list/docx
 
 npm link docx
 
-tree -I "node_modules|.next|.vscode|content|docsbaml"  
+tree -I "node_modules|.next|.vscode|content|baml_client"  
 ```
 
 ---
@@ -86,3 +86,45 @@ EDGE_STORE_SECRET_KEY=
 GOOGLE_API_KEY=
 SEARXNG_API_URL=http://localhost:8080
 ```
+
+---
+
+# API de Búsqueda - Endpoints
+
+## Endpoints con IA (BAML)
+
+Usan BAML para procesar el query antes de enviarlo a SearXNG.
+
+| Endpoint | Método | Body |
+|----------|--------|------|
+| `/api/search/images` | POST | `{ "query": "...", "chatHistory": [] }` |
+| `/api/search/videos` | POST | `{ "query": "...", "chatHistory": [] }` |
+
+## Endpoints Manuales (sin IA)
+
+Envían el query directamente a SearXNG sin procesamiento de IA.
+
+| Endpoint | Método | Body |
+|----------|--------|------|
+| `/api/search/images/manual` | POST | `{ "query": "...", "engines?": [...] }` |
+| `/api/search/videos/manual` | POST | `{ "query": "...", "engines?": [...] }` |
+
+### Ejemplos curl (Manual)
+
+```bash
+# Búsqueda manual de imágenes
+curl -X POST http://localhost:3000/api/search/images/manual \
+  -H "Content-Type: application/json" \
+  -d '{"query":"cats","engines":["google images","bing images"]}'
+
+# Búsqueda manual de videos
+curl -X POST http://localhost:3000/api/search/videos/manual \
+  -H "Content-Type: application/json" \
+  -d '{"query":"cats","engines":["youtube"]}'
+```
+
+### UI Toggle
+
+En `/search` hay un switch para alternar entre modos:
+- **Manual** (default): usa `/api/.../manual` - búsqueda directa
+- **IA**: usa `/api/...` - procesa query con BAML antes de buscar
