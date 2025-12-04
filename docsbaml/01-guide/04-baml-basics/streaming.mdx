@@ -1,0 +1,497 @@
+---
+slug: /guide/baml-basics/streaming
+---
+
+BAML lets you stream in structured JSON output from LLMs as it comes in.
+
+If you tried streaming in a JSON output from an LLM you'd see something like:
+```
+{"items": [{"name": "Appl
+{"items": [{"name": "Apple", "quantity": 2, "price": 1.
+{"items": [{"name": "Apple", "quantity": 2, "price": 1.50}], "total_cost":
+{"items": [{"name": "Apple", "quantity": 2, "price": 1.50}], "total_cost": 3.00} # Completed
+```
+
+BAML gives you fine-grained control of how it fixes this partial JSON and transforms
+it into a series of semantically valid partial objects.
+
+<Tip>You can check out more examples (including streaming in FastAPI and NextJS) in the [BAML Examples] repo.</Tip>
+
+[call BAML functions]: /docs/calling-baml/calling-functions
+[BAML Examples]: https://github.com/BoundaryML/baml-examples/tree/main
+
+Let's stream the output of this function `function ExtractReceiptInfo(email: string) -> ReceiptInfo` for our example:
+
+<Accordion title="extract-receipt-info.baml">
+
+```rust
+class ReceiptItem {
+  name string
+  description string?
+  quantity int
+  price float
+}
+
+class ReceiptInfo {
+    items ReceiptItem[]
+    total_cost float?
+}
+
+function ExtractReceiptInfo(email: string) -> ReceiptInfo {
+  client GPT4o
+  prompt #"
+    Given the receipt below:
+
+    {{ email }}
+
+    {{ ctx.output_format }}
+  "#
+}
+```
+</Accordion>
+
+The BAML code generator creates a set of types in the `baml_client` library
+in a module called `partial_types` in `baml_client`. These types are modified
+from your original types to support streaming.
+
+By default, BAML will convert all Class fields into nullable fields, and
+fill those fields with non-null values as much as possible given the tokens
+received so far.
+
+<Tabs>
+
+<Tab title="Python">
+BAML will generate `b.stream.ExtractReceiptInfo()` for you, which you can use like so:
+
+```python main.py
+import asyncio
+from baml_client import b, partial_types, types
+
+# Using a stream:
+def example1(receipt: str):
+    stream = b.stream.ExtractReceiptInfo(receipt)
+
+    # partial is a Partial type with all Optional fields
+    for partial in stream:
+        print(f"partial: parsed {len(partial.items)} items (object: {partial})")
+
+    # final is the full, original, validated ReceiptInfo type
+    final = stream.get_final_response()
+    print(f"final: {len(final.items)} items (object: {final})")
+
+# Using only get_final_response() of a stream
+#
+# In this case, you should just use b.ExtractReceiptInfo(receipt) instead,
+# which is slightly faster and more efficient.
+def example2(receipt: str):
+    final = b.stream.ExtractReceiptInfo(receipt).get_final_response()
+    print(f"final: {len(final.items)} items (object: {final})")
+
+# Using the async client:
+async def example3(receipt: str):
+    # Note the import of the async client
+    from baml_client.async_client import b
+    stream = b.stream.ExtractReceiptInfo(receipt)
+    async for partial in stream:
+        print(f"partial: parsed {len(partial.items)} items (object: {partial})")
+
+    final = await stream.get_final_response()
+    print(f"final: {len(final.items)} items (object: {final})")
+
+receipt = """
+04/14/2024 1:05 pm
+
+Ticket: 220000082489
+Register: Shop Counter
+Employee: Connor
+Customer: Sam
+Item	#	Price
+Guide leash (1 Pair) uni UNI
+1	$34.95
+The Index Town Walls
+1	$35.00
+Boot Punch
+3	$60.00
+Subtotal	$129.95
+Tax ($129.95 @ 9%)	$11.70
+Total Tax	$11.70
+Total	$141.65
+"""
+
+if __name__ == '__main__':
+    #uncomment one at a time and run to see the difference
+    example1(receipt)
+    #example2(receipt)
+    #asyncio.run(example3(receipt))
+```
+</Tab>
+
+<Tab title="TypeScript">
+BAML will generate `b.stream.ExtractReceiptInfo()` for you, which you can use like so:
+
+```ts main.ts
+import { b } from './baml_client'
+
+// Using both async iteration and getFinalResponse() from a stream
+const example1 = async (receipt: string) => {
+  const stream = b.stream.ExtractReceiptInfo(receipt)
+
+  // partial is a Partial type with all Optional fields
+  for await (const partial of stream) {
+    console.log(`partial: ${partial.items?.length} items (object: ${partial})`)
+  }
+
+  // final is the full, original, validated ReceiptInfo type
+  const final = await stream.getFinalResponse()
+  console.log(`final: ${final.items.length} items (object: ${final})`)
+}
+
+// Using only async iteration of a stream
+const example2 = async (receipt: string) => {
+  for await (const partial of b.stream.ExtractReceiptInfo(receipt)) {
+    console.log(`partial: ${partial.items?.length} items (object: ${partial})`)
+  }
+}
+
+// Using only getFinalResponse() of a stream
+//
+// In this case, you should just use b.ExtractReceiptInfo(receipt) instead,
+// which is faster and more efficient.
+const example3 = async (receipt: string) => {
+  const final = await b.stream.ExtractReceiptInfo(receipt).getFinalResponse()
+  console.log(`final: ${final.items.length} items (object: ${final})`)
+}
+
+const receipt = `
+04/14/2024 1:05 pm
+
+Ticket: 220000082489
+Register: Shop Counter
+Employee: Connor
+Customer: Sam
+Item	#	Price
+Guide leash (1 Pair) uni UNI
+1	$34.95
+The Index Town Walls
+1	$35.00
+Boot Punch
+3	$60.00
+Subtotal	$129.95
+Tax ($129.95 @ 9%)	$11.70
+Total Tax	$11.70
+Total	$141.65
+`
+
+if (require.main === module) {
+  example1(receipt)
+  example2(receipt)
+  example3(receipt)
+}
+```
+</Tab>
+
+<Tab title="Ruby (beta)">
+BAML will generate `Baml.Client.stream.ExtractReceiptInfo()` for you,
+which you can use like so:
+
+```ruby main.rb
+require_relative "baml_client/client"
+
+$b = Baml.Client
+
+# Using both iteration and get_final_response() from a stream
+def example1(receipt)
+  stream = $b.stream.ExtractReceiptInfo(receipt)
+
+  stream.each do |partial|
+    puts "partial: #{partial.items&.length} items"
+  end
+
+  final = stream.get_final_response
+  puts "final: #{final.items.length} items"
+end
+
+# Using only iteration of a stream
+def example2(receipt)
+  $b.stream.ExtractReceiptInfo(receipt).each do |partial|
+    puts "partial: #{partial.items&.length} items"
+  end
+end
+
+# Using only get_final_response() of a stream
+#
+# In this case, you should just use BamlClient.ExtractReceiptInfo(receipt) instead,
+# which is faster and more efficient.
+def example3(receipt)
+  final = $b.stream.ExtractReceiptInfo(receipt).get_final_response
+  puts "final: #{final.items.length} items"
+end
+
+receipt = <<~RECEIPT
+  04/14/2024 1:05 pm
+
+  Ticket: 220000082489
+  Register: Shop Counter
+  Employee: Connor
+  Customer: Sam
+  Item  #  Price
+  Guide leash (1 Pair) uni UNI
+  1 $34.95
+  The Index Town Walls
+  1 $35.00
+  Boot Punch
+  3 $60.00
+  Subtotal $129.95
+  Tax ($129.95 @ 9%) $11.70
+  Total Tax $11.70
+  Total $141.65
+RECEIPT
+
+if __FILE__ == $0
+  example1(receipt)
+  example2(receipt)
+  example3(receipt)
+end
+```
+
+</Tab>
+<Tab title="OpenAPI">
+
+Streaming is not yet supported via OpenAPI, but it will be coming soon!
+
+</Tab>
+</Tabs>
+
+<Note>
+Number fields are always streamed in only when the LLM completes them. E.g. if
+the final number is 129.95, you'll only see null or 129.95 instead of partial
+numbers like 1, 12, 129.9, etc.
+</Note>
+
+## Semantic Streaming
+
+BAML provides powerful attributes to control how your data streams, ensuring that partial values always maintain semantic validity. Here are the three key streaming attributes:
+
+### `@stream.done`
+This attribute ensures a type or field is only streamed when it's completely finished. It's useful when you need atomic, fully-formed values.
+
+For example:
+```baml
+class ReceiptItem {
+  name string
+  quantity int
+  price float
+
+  // The entire ReceiptItem will only stream when complete
+  @@stream.done
+}
+
+// Receipts is a list of ReceiptItems,
+// each internal item will only stream when complete
+type Receipts = ReceiptItem[]
+
+class Person {
+  // Name will only appear when fully complete,
+  // until then it will be null
+  name string @stream.done     
+  // Numbers (floats and ints) will only appear
+  // when fully complete by default
+  age int                     
+  // Bio will stream token by token
+  bio string                  
+}
+```
+
+### `@stream.not_null`
+This attribute ensures a containing object is only streamed when this field has a value. It's particularly useful for discriminator fields or required metadata.
+
+For example:
+```baml
+class Message {
+  // Message won't stream until type is known
+  type "error" | "success" | "info" @stream.not_null
+  // Timestamp will only appear when fully complete
+  // until then it will be null
+  timestamp string @stream.done                       
+  // Content can stream token by token
+  content string                                      
+}
+```
+
+### `@stream.with_state`
+This attribute adds metadata to track if a field has finished streaming. It's perfect for showing loading states in UIs.
+
+For example:
+```baml
+class BlogPost {
+  // The blog post will only stream when title is known
+  title string @stream.done @stream.not_null
+  // The content will stream token by token, and include completion state
+  content string @stream.with_state 
+}
+```
+
+This will generate the following code in the `partial_types` module:
+<Tabs>
+<Tab title="Python">
+```python
+class StreamState(BaseModel, Generic[T]):
+  value: T,
+  state: "incomplete" | "complete"
+
+class BlogPost(BaseModel):
+  title: str
+  content: StreamState[str | None]
+```
+</Tab>
+
+<Tab title="Typescript">
+```typescript
+interface StreamState<T> {
+  value: T,
+  state: "incomplete" | "complete"
+}
+
+interface BlogPost {
+  title: StreamState<string>
+  content: StreamState<string>
+}
+```
+</Tab>
+</Tabs>
+
+### Type Transformation Summary
+
+Here's how these attributes affect your types in generated code:
+
+| BAML Type                         | Generated Type (during streaming)              | Description                                    |
+|----------------------------------|----------------------------|------------------------------------------------|
+| `T`                               | `Partial[T]?`              | Default: Nullable and partial                   |
+| `T @stream.done`                  | `T?`                       | Nullable but always complete when present       |
+| `T @stream.not_null`              | `Partial[T]`               | Always present but may be partial              |
+| `T @stream.done @stream.not_null` | `T`                        | Always present and always complete             |
+| `T @stream.with_state`            | `StreamState[Partial[T]?]` | Includes streaming state metadata              |
+
+<Warning>
+The return type of a function is not affected by streaming attributes!
+</Warning>
+
+## Putting it all together
+
+Let's put all of these concepts together to design an application that
+streams a conversation containing stock recommendations, using semantic
+streaming to ensure that the streamed data obeys our domain's invariants.
+
+```baml
+enum Stock {
+  APPL
+  MSFT
+  GOOG
+  BAML
+}
+
+// Make recommendations atomic - we do not want a recommendation to be
+// modified by streaming additional messages.
+class Recommendation {
+  stock Stock
+  amount float
+  action "buy" | "sell"
+  @@stream.done
+}
+
+class AssistantMessage {
+  message_type "greeting" | "conversation" | "farewell" @stream.not_null
+  message string @stream.with_state @stream.not_null
+}
+
+function Respond(
+  history: (UserMessage | AssistantMessage | Recommendation)[]
+) -> Message | Recommendation { 
+  client DeepseekR1
+  prompt #"
+    Make the message in the conversation, using a conversational
+    message or a stock recommendation, based on this conversation history:
+    {{ history }}.
+
+    {{ ctx.output_format }}
+  "#
+}
+```
+
+<Tabs>
+
+<Tab title="Python">
+The above BAML code will generate the following Python definitions in the
+`partial_types` module. The use of streaming attributes has several effects on
+the generated code:
+
+ - `Recommendation` does not have any partial fields because it was marked
+   `@stream.done`.
+ - The `Message.message` `string` is wrapped in `StreamState`, allowing
+   runtime checking of its completion status. This status could be used
+   to render a spinner as the message streams in.
+ - The `Message.message_type` field may not be `null`, because it was marked
+   as `@stream.not_null`.
+
+```python
+class StreamState(BaseModel, Generic[T]):
+  value: T,
+  state: Literal["Pending", "Incomplete", "Complete"]
+
+class Stock(str, Enum):
+    APPL = "APPL"
+    MSFT = "MSFT"
+    GOOG = "GOOG"
+    BAML = "BAML"
+
+class Recommendation(BaseClass):
+    stock: Stock
+    amount: float
+    action: Literal["buy", "sell"]
+
+class Message(BaseClass):
+  message_type: Literal["gretting","conversation","farewell"]
+  message: StreamState[string]
+```
+</Tab>
+
+<Tab title="Typescript">
+This BAML code will generate the following Typescript definitions in the
+`partial_types` module. The use of streaming attributes has several effects on
+the generated code:
+
+ - `Recommendation` does not have any partial fields because it was marked
+   `@stream.done`.
+ - The `Message.message` `string` is wrapped in `StreamState`, allowing
+   runtime checking of its completion status. This status could be used
+   to render a spinner as the message streams in.
+ - The `Message.message_type` field may not be `null`, because it was marked
+   as `@stream.not_null`.
+
+```typescript
+export interface StreamState<T> {
+  value: T,
+  state: "Pending" | "Incomplete" | "Complete"
+}
+
+export enum Category {
+  APPL = "APPl",
+  MSFT = "MSFT",
+  GOOG = "GOOG",
+  BAML = "BAML",
+}
+
+export interface Recommendation {
+  stock: Stock,
+  amount: float,
+  action: "buy" | "sell"
+}
+
+export interface Message {
+  message_type: "gretting" | "conversation" | "farewell"
+  message: StreamState<string>
+}
+```
+</Tab>
+
+</Tabs>
