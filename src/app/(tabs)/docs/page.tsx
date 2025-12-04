@@ -13,11 +13,6 @@ import { useEdgeStore } from '@/lib/edgestore';
 import { RefreshCwIcon, TagIcon, UploadCloudIcon } from 'lucide-react';
 import * as React from 'react';
 import { toast } from '@/components/ui/use-toast';
-
-// For docxtemplater functionality
-import PizZip from 'pizzip';
-import Docxtemplater from 'docxtemplater';
-import InspectModule from 'docxtemplater/js/inspect-module';
 import { DocumentForm } from '@/components/DocumentForm';
 
 export default function DocsPage() {
@@ -98,7 +93,7 @@ function DocsExample() {
     [edgestore],
   );
 
-  // Function to extract tags from a selected document
+  // Function to extract tags from a selected document using API
   const extractDocumentTags = React.useCallback(async (file: StoredFile) => {
     setSelectedFile(file);
     setIsProcessing(true);
@@ -112,33 +107,35 @@ function DocsExample() {
       }
       
       // Fetch the document content
-      const response = await fetch(file.url);
-      if (!response.ok) {
+      const fileResponse = await fetch(file.url);
+      if (!fileResponse.ok) {
         throw new Error('Failed to download the document');
       }
       
-      // Convert response to ArrayBuffer
-      const arrayBuffer = await response.arrayBuffer();
-      const content = new Uint8Array(arrayBuffer);
+      // Get the file as blob and create FormData
+      const blob = await fileResponse.blob();
+      const formData = new FormData();
+      formData.append('template', blob, file.filename);
       
-      // Use PizZip to unzip the document
-      const zip = new PizZip(content);
-      
-      // Create InspectModule to extract tags - use 'new' keyword here
-      const iModule = new InspectModule();
-      
-      // Create docxtemplater with the inspect module
-      const doc = new Docxtemplater(zip, {
-        modules: [iModule],
-        linebreaks: true,
-        paragraphLoop: true,
+      // Call the API to detect placeholders
+      const response = await fetch('/api/docx/detect-placeholders', {
+        method: 'POST',
+        body: formData
       });
       
-      // Render document to prepare for tag extraction
-      doc.render();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to detect placeholders');
+      }
       
-      // Get all tags
-      const tags = iModule.getAllTags();
+      const { placeholders } = await response.json();
+      
+      // Convert placeholders array to tags object format
+      const tags: Record<string, any> = {};
+      placeholders.forEach((placeholder: string) => {
+        tags[placeholder] = true;
+      });
+      
       setDocumentTags(tags);
     } catch (error) {
       console.error('Error processing document:', error);

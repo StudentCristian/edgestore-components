@@ -25,6 +25,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^1.2.1",
     "docxtemplater": "^3.65.0",
+    "jsdom": "^27.2.0",
+    "jszip": "^3.10.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.487.0",
     "next": "15.3.1",
@@ -42,6 +44,8 @@
   "devDependencies": {
     "@boundaryml/baml": "^0.214.0",
     "@tailwindcss/postcss": "^4",
+    "@types/jsdom": "^27.0.0",
+    "@types/jszip": "^3.4.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
