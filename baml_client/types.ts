@@ -52,7 +52,42 @@ export interface DynamicFields {
   [key: string]: any;
 }
 
+export interface ImageResult {
+  img_src: string
+  url: string
+  title: string
+  
+}
+
+export interface Message {
+  role: string
+  content: string
+  
+}
+
 export interface Resume {
   markdown: string
+  
+}
+
+export interface VideoResult {
+  img_src: string
+  url: string
+  title: string
+  iframe_src: string
+  
+}
+
+export interface WebSearchResult {
+  title: string
+  url: string
+  img_src?: string | null
+  iframe_src?: string | null
+  
+}
+
+export interface WebSearchTool {
+  query: string
+  engines: string[]
   
 }

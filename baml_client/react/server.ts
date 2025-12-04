@@ -24,13 +24,31 @@ import { b } from '../index';
 import type { Check, Checked  } from "../types";
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml";
 
-import type {  DynamicFields,  Resume } from "../types"
+import type {  DynamicFields,  ImageResult,  Message,  Resume,  VideoResult,  WebSearchResult,  WebSearchTool } from "../types"
 
 import type * as types from "../types"
 
 /**
  * Regular BAML server actions that return direct responses.
  */
+
+/**
+ * Executes the "ExecuteWebSearch" BAML action.
+ *
+ * This server action calls the underlying BAML function "ExecuteWebSearch"
+ * with the specified parameters.
+ *
+ * @param { string } message - Input parameter.
+ *
+ * @returns {Promise<types.WebSearchTool>} A promise that resolves with the result of the action.
+ */
+export const ExecuteWebSearch = async (
+  message: string,
+): Promise<types.WebSearchTool> => {
+  return b.ExecuteWebSearch(
+    message,
+  );
+};
 
 /**
  * Executes the "ExtractResume" BAML action.
@@ -68,5 +86,47 @@ export const ProcessForm = async (
   return b.ProcessForm(
     context_data,
     fields_data,
+  );
+};
+
+/**
+ * Executes the "SearchImages" BAML action.
+ *
+ * This server action calls the underlying BAML function "SearchImages"
+ * with the specified parameters.
+ *
+ * @param { string } message - Input parameter.
+ * @param { types.Message[] } history - Input parameter.
+ *
+ * @returns {Promise<types.ImageResult[]>} A promise that resolves with the result of the action.
+ */
+export const SearchImages = async (
+  message: string,
+  history: types.Message[],
+): Promise<types.ImageResult[]> => {
+  return b.SearchImages(
+    message,
+    history,
+  );
+};
+
+/**
+ * Executes the "SearchVideos" BAML action.
+ *
+ * This server action calls the underlying BAML function "SearchVideos"
+ * with the specified parameters.
+ *
+ * @param { string } message - Input parameter.
+ * @param { types.Message[] } history - Input parameter.
+ *
+ * @returns {Promise<types.VideoResult[]>} A promise that resolves with the result of the action.
+ */
+export const SearchVideos = async (
+  message: string,
+  history: types.Message[],
+): Promise<types.VideoResult[]> => {
+  return b.SearchVideos(
+    message,
+    history,
   );
 };

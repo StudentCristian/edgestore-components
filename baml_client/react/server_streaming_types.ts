@@ -21,12 +21,15 @@ $ pnpm add @boundaryml/baml
 import type { Check, Checked  } from "../types";
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml";
 
-import type {  DynamicFields,  Resume } from "../types"
+import type {  DynamicFields,  ImageResult,  Message,  Resume,  VideoResult,  WebSearchResult,  WebSearchTool } from "../types"
 
 import type * as types from "../types"
 import type { partial_types }from "../partial_types";
 
 export type StreamingServerTypes = {
+  ExecuteWebSearch: WebSearchTool,
   ExtractResume: Resume,
   ProcessForm: DynamicFields,
-}
+  SearchImages: ImageResult[],
+  SearchVideos: VideoResult[],
+}

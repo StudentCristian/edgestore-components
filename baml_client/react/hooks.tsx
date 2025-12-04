@@ -348,6 +348,56 @@ function useBamlAction<FunctionName extends FunctionNames>(
   } satisfies HookOutput<FunctionName, { stream: typeof props.stream }>
 }
 /**
+ * A specialized hook for the ExecuteWebSearch BAML function that supports both streaming and non‑streaming responses.
+ *
+ * **Input Types:**
+ *
+ * - message: string
+ *
+ *
+ * **Return Type:**
+ * - **Non‑streaming:** types.WebSearchTool
+ * - **Streaming Partial:** WebSearchTool
+ * - **Streaming Final:** types.WebSearchTool
+ *
+ * **Usage Patterns:**
+ * 1. **Non‑streaming (Default)**
+ *    - Best for quick responses and simple UI updates.
+ * 2. **Streaming**
+ *    - Ideal for long‑running operations or real‑time feedback.
+ *
+ * **Edge Cases:**
+ * - Ensure robust error handling via `onError`.
+ * - Handle cases where partial data may be incomplete or missing.
+ *
+ * @example
+ * ```tsx
+ * // Basic non‑streaming usage:
+ * const { data, error, isLoading, mutate } = useExecuteWebSearch({ stream: false});
+ *
+ * // Streaming usage:
+ * const { data, streamData, isLoading, error, mutate } = useExecuteWebSearch({
+ *   stream: true | undefined,
+ *   onStreamData: (partial) => console.log('Partial update:', partial),
+ *   onFinalData: (final) => console.log('Final result:', final),
+ *   onError: (err) => console.error('Error:', err),
+ * });
+ * ```
+ */
+export function useExecuteWebSearch(props: HookInput<'ExecuteWebSearch', { stream: false }>): HookOutput<'ExecuteWebSearch', { stream: false }>
+export function useExecuteWebSearch(props?: HookInput<'ExecuteWebSearch', { stream?: true }>): HookOutput<'ExecuteWebSearch', { stream: true }>
+export function useExecuteWebSearch(
+  props: HookInput<'ExecuteWebSearch', { stream?: boolean }> = {},
+): HookOutput<'ExecuteWebSearch', { stream: true }> | HookOutput<'ExecuteWebSearch', { stream: false }> {
+  let action: ServerAction = Actions.ExecuteWebSearch;
+  if (isStreamingProps(props)) {
+    action = StreamingActions.ExecuteWebSearch;
+    return useBamlAction(action, props)
+  } else {
+    return useBamlAction(action, props as HookInput<'ExecuteWebSearch', { stream: false }>)
+  }
+}
+/**
  * A specialized hook for the ExtractResume BAML function that supports both streaming and non‑streaming responses.
  *
  * **Input Types:**
@@ -447,5 +497,109 @@ export function useProcessForm(
     return useBamlAction(action, props)
   } else {
     return useBamlAction(action, props as HookInput<'ProcessForm', { stream: false }>)
+  }
+}
+/**
+ * A specialized hook for the SearchImages BAML function that supports both streaming and non‑streaming responses.
+ *
+ * **Input Types:**
+ *
+ * - message: string
+ *
+ * - history: types.Message[]
+ *
+ *
+ * **Return Type:**
+ * - **Non‑streaming:** types.ImageResult[]
+ * - **Streaming Partial:** ImageResult[]
+ * - **Streaming Final:** types.ImageResult[]
+ *
+ * **Usage Patterns:**
+ * 1. **Non‑streaming (Default)**
+ *    - Best for quick responses and simple UI updates.
+ * 2. **Streaming**
+ *    - Ideal for long‑running operations or real‑time feedback.
+ *
+ * **Edge Cases:**
+ * - Ensure robust error handling via `onError`.
+ * - Handle cases where partial data may be incomplete or missing.
+ *
+ * @example
+ * ```tsx
+ * // Basic non‑streaming usage:
+ * const { data, error, isLoading, mutate } = useSearchImages({ stream: false});
+ *
+ * // Streaming usage:
+ * const { data, streamData, isLoading, error, mutate } = useSearchImages({
+ *   stream: true | undefined,
+ *   onStreamData: (partial) => console.log('Partial update:', partial),
+ *   onFinalData: (final) => console.log('Final result:', final),
+ *   onError: (err) => console.error('Error:', err),
+ * });
+ * ```
+ */
+export function useSearchImages(props: HookInput<'SearchImages', { stream: false }>): HookOutput<'SearchImages', { stream: false }>
+export function useSearchImages(props?: HookInput<'SearchImages', { stream?: true }>): HookOutput<'SearchImages', { stream: true }>
+export function useSearchImages(
+  props: HookInput<'SearchImages', { stream?: boolean }> = {},
+): HookOutput<'SearchImages', { stream: true }> | HookOutput<'SearchImages', { stream: false }> {
+  let action: ServerAction = Actions.SearchImages;
+  if (isStreamingProps(props)) {
+    action = StreamingActions.SearchImages;
+    return useBamlAction(action, props)
+  } else {
+    return useBamlAction(action, props as HookInput<'SearchImages', { stream: false }>)
+  }
+}
+/**
+ * A specialized hook for the SearchVideos BAML function that supports both streaming and non‑streaming responses.
+ *
+ * **Input Types:**
+ *
+ * - message: string
+ *
+ * - history: types.Message[]
+ *
+ *
+ * **Return Type:**
+ * - **Non‑streaming:** types.VideoResult[]
+ * - **Streaming Partial:** VideoResult[]
+ * - **Streaming Final:** types.VideoResult[]
+ *
+ * **Usage Patterns:**
+ * 1. **Non‑streaming (Default)**
+ *    - Best for quick responses and simple UI updates.
+ * 2. **Streaming**
+ *    - Ideal for long‑running operations or real‑time feedback.
+ *
+ * **Edge Cases:**
+ * - Ensure robust error handling via `onError`.
+ * - Handle cases where partial data may be incomplete or missing.
+ *
+ * @example
+ * ```tsx
+ * // Basic non‑streaming usage:
+ * const { data, error, isLoading, mutate } = useSearchVideos({ stream: false});
+ *
+ * // Streaming usage:
+ * const { data, streamData, isLoading, error, mutate } = useSearchVideos({
+ *   stream: true | undefined,
+ *   onStreamData: (partial) => console.log('Partial update:', partial),
+ *   onFinalData: (final) => console.log('Final result:', final),
+ *   onError: (err) => console.error('Error:', err),
+ * });
+ * ```
+ */
+export function useSearchVideos(props: HookInput<'SearchVideos', { stream: false }>): HookOutput<'SearchVideos', { stream: false }>
+export function useSearchVideos(props?: HookInput<'SearchVideos', { stream?: true }>): HookOutput<'SearchVideos', { stream: true }>
+export function useSearchVideos(
+  props: HookInput<'SearchVideos', { stream?: boolean }> = {},
+): HookOutput<'SearchVideos', { stream: true }> | HookOutput<'SearchVideos', { stream: false }> {
+  let action: ServerAction = Actions.SearchVideos;
+  if (isStreamingProps(props)) {
+    action = StreamingActions.SearchVideos;
+    return useBamlAction(action, props)
+  } else {
+    return useBamlAction(action, props as HookInput<'SearchVideos', { stream: false }>)
   }
 }

@@ -20,7 +20,7 @@ $ pnpm add @boundaryml/baml
 
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml"
 import type { Checked, Check } from "./types"
-import type {  DynamicFields,  Resume } from "./types"
+import type {  DynamicFields,  ImageResult,  Message,  Resume,  VideoResult,  WebSearchResult,  WebSearchTool } from "./types"
 import type * as types from "./types"
 
 /******************************************************************************
@@ -39,7 +39,32 @@ export namespace partial_types {
     export interface DynamicFields {
       [key: string]: any;
     }
+    export interface ImageResult {
+      img_src?: string | null
+      url?: string | null
+      title?: string | null
+    }
+    export interface Message {
+      role?: string | null
+      content?: string | null
+    }
     export interface Resume {
       markdown?: string | null
+    }
+    export interface VideoResult {
+      img_src?: string | null
+      url?: string | null
+      title?: string | null
+      iframe_src?: string | null
+    }
+    export interface WebSearchResult {
+      title?: string | null
+      url?: string | null
+      img_src?: string | null
+      iframe_src?: string | null
+    }
+    export interface WebSearchTool {
+      query?: string | null
+      engines: string[]
     }
 }

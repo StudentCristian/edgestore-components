@@ -24,13 +24,32 @@ import { b } from '../index';
 import type { Check, Checked  } from "../types";
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml";
 
-import type {  DynamicFields,  Resume } from "../types"
+import type {  DynamicFields,  ImageResult,  Message,  Resume,  VideoResult,  WebSearchResult,  WebSearchTool } from "../types"
 
 import type * as types from "../types"
 
 /**
  * Streaming BAML server actions that return ReadableStreams.
  */
+
+/**
+ * Executes the streaming variant of the "ExecuteWebSearch" BAML action.
+ *
+ * This action initiates a streaming response by calling the corresponding
+ * BAML stream function. The returned stream yields incremental updates.
+ *
+ * @param { string } message - Input parameter.
+ *
+ * @returns {ReadableStream<Uint8Array>} A stream that yields incremental updates from the action.
+ */
+export const ExecuteWebSearch = async (
+  message: string,
+): Promise<ReadableStream<Uint8Array>> => {
+  const stream = b.stream.ExecuteWebSearch(
+    message,
+  );
+  return Promise.resolve(stream.toStreamable());
+};
 
 /**
  * Executes the streaming variant of the "ExtractResume" BAML action.
@@ -69,6 +88,50 @@ export const ProcessForm = async (
   const stream = b.stream.ProcessForm(
     context_data,
     fields_data,
+  );
+  return Promise.resolve(stream.toStreamable());
+};
+
+/**
+ * Executes the streaming variant of the "SearchImages" BAML action.
+ *
+ * This action initiates a streaming response by calling the corresponding
+ * BAML stream function. The returned stream yields incremental updates.
+ *
+ * @param { string } message - Input parameter.
+ * @param { types.Message[] } history - Input parameter.
+ *
+ * @returns {ReadableStream<Uint8Array>} A stream that yields incremental updates from the action.
+ */
+export const SearchImages = async (
+  message: string,
+  history: types.Message[],
+): Promise<ReadableStream<Uint8Array>> => {
+  const stream = b.stream.SearchImages(
+    message,
+    history,
+  );
+  return Promise.resolve(stream.toStreamable());
+};
+
+/**
+ * Executes the streaming variant of the "SearchVideos" BAML action.
+ *
+ * This action initiates a streaming response by calling the corresponding
+ * BAML stream function. The returned stream yields incremental updates.
+ *
+ * @param { string } message - Input parameter.
+ * @param { types.Message[] } history - Input parameter.
+ *
+ * @returns {ReadableStream<Uint8Array>} A stream that yields incremental updates from the action.
+ */
+export const SearchVideos = async (
+  message: string,
+  history: types.Message[],
+): Promise<ReadableStream<Uint8Array>> => {
+  const stream = b.stream.SearchVideos(
+    message,
+    history,
   );
   return Promise.resolve(stream.toStreamable());
 };

@@ -29,14 +29,24 @@ export default class TypeBuilder {
     
     DynamicFields: ClassBuilder<'DynamicFields'>;
     
+    ImageResult: ClassViewer<'ImageResult', "img_src" | "url" | "title">;
+    
+    Message: ClassViewer<'Message', "role" | "content">;
+    
     Resume: ClassViewer<'Resume', "markdown">;
+    
+    VideoResult: ClassViewer<'VideoResult', "img_src" | "url" | "title" | "iframe_src">;
+    
+    WebSearchResult: ClassViewer<'WebSearchResult', "title" | "url" | "img_src" | "iframe_src">;
+    
+    WebSearchTool: ClassViewer<'WebSearchTool', "query" | "engines">;
     
     
 
     constructor() {
         this.tb = new _TypeBuilder({
           classes: new Set([
-            "DynamicFields","Resume",
+            "DynamicFields","ImageResult","Message","Resume","VideoResult","WebSearchResult","WebSearchTool",
           ]),
           enums: new Set([
             
@@ -48,8 +58,28 @@ export default class TypeBuilder {
           
         ]);
         
+        this.ImageResult = this.tb.classViewer("ImageResult", [
+          "img_src","url","title",
+        ]);
+        
+        this.Message = this.tb.classViewer("Message", [
+          "role","content",
+        ]);
+        
         this.Resume = this.tb.classViewer("Resume", [
           "markdown",
+        ]);
+        
+        this.VideoResult = this.tb.classViewer("VideoResult", [
+          "img_src","url","title","iframe_src",
+        ]);
+        
+        this.WebSearchResult = this.tb.classViewer("WebSearchResult", [
+          "title","url","img_src","iframe_src",
+        ]);
+        
+        this.WebSearchTool = this.tb.classViewer("WebSearchTool", [
+          "query","engines",
         ]);
         
         
@@ -126,4 +156,4 @@ export default class TypeBuilder {
     addBaml(baml: string): void {
         this.tb.addBaml(baml);
     }
-}
+}

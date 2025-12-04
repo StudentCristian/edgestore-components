@@ -1,6 +1,6 @@
 'use client';
 
-import { TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs as TabsRoot, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { usePathname as useNextPathname } from 'next/navigation';
 
@@ -10,8 +10,8 @@ const TABS = [
   { label: 'multi file', href: '/multi-file' },
   { label: 'multi file instant', href: '/multi-file-instant' },
   { label: 'forms', href: '/forms' },
-  { label: 'tags', href: '/tags' }, // Added new tab
-  { label: 'docs', href: '/docs' }, // Added new tab docs
+  { label: 'tags', href: '/tags' },
+  { label: 'docs', href: '/docs' },
 ] as const;
 
 export function Tabs() {
@@ -19,15 +19,17 @@ export function Tabs() {
 
   return (
     <div className="flex flex-row justify-center">
-      <TabsList>
-        {TABS.map((tab) => (
-          <TabsTrigger key={tab.href} active={pathname === tab.href}>
-            <Link className="w-full" href={tab.href}>
-              {tab.label}
-            </Link>
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      <TabsRoot value={pathname}>
+        <TabsList>
+          {TABS.map((tab) => (
+            <TabsTrigger key={tab.href} value={tab.href} asChild>
+              <Link className="w-full" href={tab.href}>
+                {tab.label}
+              </Link>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </TabsRoot>
     </div>
   );
 }

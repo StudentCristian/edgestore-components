@@ -1,0 +1,45 @@
+use_default_settings: true
+
+server:
+  secret_key: "k9$mP2xL7nQ4wR8vF3jH6cT1bY5sA0dG"
+  limiter: false
+  image_proxy: true
+  bind_address: "0.0.0.0"
+  port: 8080
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  default_lang: ""
+  formats:
+    - html
+    - json
+
+ui:
+  static_use_hash: true
+
+outgoing:
+  request_timeout: 10.0
+  useragent_suffix: ""
+
+engines:
+  - name: google
+    engine: google
+    shortcut: g
+    disabled: false
+  - name: bing
+    engine: bing
+    shortcut: bi
+    disabled: false
+  - name: google images
+    engine: google_images
+    shortcut: goi
+    disabled: false
+  - name: bing images
+    engine: bing_images
+    shortcut: bii
+    disabled: false
+  - name: youtube
+    engine: youtube_noapi
+    shortcut: yt
+    disabled: false
