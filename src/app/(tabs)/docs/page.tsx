@@ -31,7 +31,7 @@ type UploadResult = {
 type StoredFile = {
   url: string;
   filename: string;
-  uploadedAt: Date;
+  uploadedAt: string; // ISO string para ser JSON serializable
 };
 
 function DocsExample() {
@@ -45,7 +45,7 @@ function DocsExample() {
   const [generatedDocs, setGeneratedDocs] = React.useState<Array<{
     url: string;
     filename: string;
-    generatedAt: Date;
+    generatedAt: string; // ISO string para ser JSON serializable
   }>>([]);
   const { edgestore } = useEdgeStore();
 
@@ -207,7 +207,7 @@ function DocsExample() {
                   });
                   setGeneratedDocs(prev => [
                     ...prev,
-                    { url, filename, generatedAt: new Date() }
+                    { url, filename, generatedAt: new Date().toISOString() }
                   ]);
                 }}
                 onGenerateError={(error) => {

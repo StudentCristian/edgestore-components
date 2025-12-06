@@ -52,12 +52,23 @@ export default function ImageGrid({
   const copyAsMarkdown = async (image: ImageResult, index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     const markdown = `![${image.title}](${image.img_src})`;
-    await navigator.clipboard.writeText(markdown);
-    setCopiedIndex(index);
-    toast({
-      title: "Copied as Markdown",
-      description: `Image "${image.title.slice(0, 30)}..." copied to clipboard`,
-    });
+    
+    try {
+      await navigator.clipboard.writeText(markdown);
+      setCopiedIndex(index);
+      toast({
+        title: "Copied as Markdown",
+        description: `Image "${image.title.slice(0, 30)}..." copied to clipboard`,
+      });
+    } catch (error) {
+      console.error('Clipboard error:', error);
+      toast({
+        title: "Copy failed",
+        description: "Could not copy to clipboard. Try using HTTPS.",
+        variant: "destructive",
+      });
+    }
+    
     setTimeout(() => setCopiedIndex(null), 2000);
   };
   const hasMoreImages = images.length > initialVisible;

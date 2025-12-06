@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -114,18 +114,19 @@ export default function SearchResultsPanel({
     executeSearch(query);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
 
   // Auto-search on mount if enabled
-  useState(() => {
+  useEffect(() => {
     if (autoSearch && initialQuery) {
       executeSearch(initialQuery);
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo ejecutar al montar
 
   const imageCount = results?.images.length || 0;
   const videoCount = results?.videos.length || 0;
@@ -150,7 +151,7 @@ export default function SearchResultsPanel({
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="Search images & videos..."
               className="flex-1 h-9"
               disabled={isLoading}

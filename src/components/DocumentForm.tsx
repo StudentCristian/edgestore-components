@@ -21,7 +21,7 @@ interface DocumentFormProps {
   selectedDocument: {  
     url: string;  
     filename: string;  
-    uploadedAt: Date;  
+    uploadedAt: string; // ISO string para ser JSON serializable  
   };  
   documentTags: Record<string, any>;  
   onGenerateStart?: () => void;  
@@ -108,15 +108,29 @@ export function DocumentForm({
           throw new Error('Error calling process-form API');
         }
         
-        const { success, data: generatedContent } = await response.json();
+        const responseData = await response.json();
         
-        if (success && generatedContent) {
-          // Agregar contenido generado por AI
+        // Validar estructura de respuesta
+        if (!responseData || typeof responseData !== 'object') {
+          throw new Error('Invalid API response structure');
+        }
+        
+        const { success, data: generatedContent } = responseData;
+        
+        if (success && generatedContent && typeof generatedContent === 'object') {
+          // Agregar contenido generado por AI con validación
           Object.keys(promptFields).forEach(placeholder => {
-            content[placeholder] = generatedContent[placeholder] || `Contenido generado para ${placeholder}`;
+            const content_value = generatedContent[placeholder];
+            if (typeof content_value === 'string' && content_value.trim()) {
+              content[placeholder] = content_value;
+            } else {
+              console.warn(`Invalid or empty content for placeholder: ${placeholder}`);
+              content[placeholder] = `Contenido generado para ${placeholder}`;
+            }
           });
         } else {
-          // Fallback si la API no devuelve éxito
+          // Fallback si la API no devuelve éxito o datos válidos
+          console.warn('API response missing success or data:', responseData);
           Object.keys(promptFields).forEach(placeholder => {
             content[placeholder] = `[AI] Contenido para: ${promptFields[placeholder] || placeholder}`;
           });
@@ -212,13 +226,28 @@ export function DocumentForm({
 
       const { placeholders: detectedPlaceholders } = await detectResponse.json();
 
-      // 3. Usar contenido del editor segmentado
+      // 3. Usar contenido del editor segmentado (con fallback a editorInitialContent)
       const generatedFields = detectedPlaceholders.reduce((acc: Record<string, FieldData>, placeholder: string) => {
+        let generatedValue = '';
+        
+        // Prioridad 1: Contenido editado en el editor (parseado del markdown)
+        if (generatedMarkdown && generatedMarkdown.includes(`## ${placeholder}`)) {
+          generatedValue = generatedMarkdown.split(`## ${placeholder}`)[1]?.split('---')[0]?.trim() || '';
+        }
+        
+        // Prioridad 2: Contenido inicial generado por BAML (si el usuario no editó)
+        if (!generatedValue && editorInitialContent[placeholder]) {
+          generatedValue = editorInitialContent[placeholder];
+        }
+        
+        // Prioridad 3: Fallback
+        if (!generatedValue) {
+          generatedValue = `Contenido para ${placeholder}`;
+        }
+        
         acc[placeholder] = {
           originalValue: "",
-          generatedValue: generatedMarkdown.includes(`## ${placeholder}`)
-            ? generatedMarkdown.split(`## ${placeholder}`)[1]?.split('---')[0]?.trim() || `Contenido para ${placeholder}`
-            : `Contenido para ${placeholder}`,
+          generatedValue,
           isPrompt: true
         };
         return acc;

@@ -22,44 +22,44 @@ export default function TestPanel() {
     setSelectedVideosMarkdown([]);
   }, []);
 
-  const handleImageSelect = (image: ImageResult) => {
+  const handleImageSelect = useCallback((image: ImageResult) => {
     const markdown = `![${image.title}](${image.img_src})`;
-    const isSelected = selectedImages.has(image.img_src);
     
-    if (isSelected) {
-      // Deseleccionar
-      setSelectedImages((prev) => {
-        const next = new Set(prev);
+    setSelectedImages((prev) => {
+      const isSelected = prev.has(image.img_src);
+      const next = new Set(prev);
+      
+      if (isSelected) {
         next.delete(image.img_src);
-        return next;
-      });
-      setSelectedImagesMarkdown((prev) => prev.filter(md => md !== markdown));
-    } else {
-      // Seleccionar
-      setSelectedImages((prev) => new Set(prev).add(image.img_src));
-      setSelectedImagesMarkdown((prev) => [...prev, markdown]);
-    }
-  };
+        setSelectedImagesMarkdown((prevMd) => prevMd.filter(md => md !== markdown));
+      } else {
+        next.add(image.img_src);
+        setSelectedImagesMarkdown((prevMd) => [...prevMd, markdown]);
+      }
+      
+      return next;
+    });
+  }, []);
 
-  const handleVideoSelect = (video: VideoResult) => {
+  const handleVideoSelect = useCallback((video: VideoResult) => {
     const videoId = video.iframe_src || video.url;
     const markdown = `[![${video.title}](${video.img_src})](${video.url})`;
-    const isSelected = selectedVideos.has(videoId);
     
-    if (isSelected) {
-      // Deseleccionar
-      setSelectedVideos((prev) => {
-        const next = new Set(prev);
+    setSelectedVideos((prev) => {
+      const isSelected = prev.has(videoId);
+      const next = new Set(prev);
+      
+      if (isSelected) {
         next.delete(videoId);
-        return next;
-      });
-      setSelectedVideosMarkdown((prev) => prev.filter(md => md !== markdown));
-    } else {
-      // Seleccionar
-      setSelectedVideos((prev) => new Set(prev).add(videoId));
-      setSelectedVideosMarkdown((prev) => [...prev, markdown]);
-    }
-  };
+        setSelectedVideosMarkdown((prevMd) => prevMd.filter(md => md !== markdown));
+      } else {
+        next.add(videoId);
+        setSelectedVideosMarkdown((prevMd) => [...prevMd, markdown]);
+      }
+      
+      return next;
+    });
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto py-10 space-y-6">

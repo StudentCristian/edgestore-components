@@ -1,6 +1,6 @@
 "use client"  
 import type React from "react"  
-import { useRef, useEffect } from "react"  
+import { useRef, useEffect, useCallback } from "react"  
 import { cn } from "@/lib/utils"  
 import { Badge } from "@/components/ui/badge"  
   
@@ -21,6 +21,10 @@ export function EditorSegment({ placeholder, markdown, onContentChange, isFirst,
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`  
     }  
   }, [markdown])  
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onContentChange(e.target.value)
+  }, [onContentChange])
   
   return (  
     <div className={cn("relative", !isFirst && "border-t border-border/50")}>  
@@ -37,7 +41,7 @@ export function EditorSegment({ placeholder, markdown, onContentChange, isFirst,
       <textarea  
         ref={textareaRef}  
         value={markdown}  
-        onChange={(e) => onContentChange(e.target.value)}  
+        onChange={handleChange}  
         className={cn(  
           "w-full px-4 py-3 pr-20 bg-transparent resize-none outline-none",  
           "font-mono text-sm leading-relaxed text-foreground",  

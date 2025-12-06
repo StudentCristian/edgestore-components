@@ -68,12 +68,23 @@ export default function VideoGrid({
     e.stopPropagation();
     // Formato: imagen thumbnail que es link al video
     const markdown = `[![${video.title}](${video.img_src})](${video.url})`;
-    await navigator.clipboard.writeText(markdown);
-    setCopiedIndex(index);
-    toast({
-      title: "Copied as Markdown",
-      description: `Video "${video.title.slice(0, 30)}..." copied to clipboard`,
-    });
+    
+    try {
+      await navigator.clipboard.writeText(markdown);
+      setCopiedIndex(index);
+      toast({
+        title: "Copied as Markdown",
+        description: `Video "${video.title.slice(0, 30)}..." copied to clipboard`,
+      });
+    } catch (error) {
+      console.error('Clipboard error:', error);
+      toast({
+        title: "Copy failed",
+        description: "Could not copy to clipboard. Try using HTTPS.",
+        variant: "destructive",
+      });
+    }
+    
     setTimeout(() => setCopiedIndex(null), 2000);
   };
   const hasMoreVideos = videos.length > initialVisible;
@@ -94,11 +105,16 @@ export default function VideoGrid({
     iframe_src: video.iframe_src,
   }));
 
+  // Limpiar refs cuando cambian los videos o al desmontar
   useEffect(() => {
+    // Resetear refs cuando cambia la lista de videos
+    videoRefs.current = [];
+    
     return () => {
       pauseAllVideos();
+      videoRefs.current = []; // Limpiar referencias al desmontar
     };
-  }, []);
+  }, [videos]);
 
   // Obtener un ID único para el video (preferir iframe_src, fallback a url)
   const getVideoId = (video: VideoResult) => video.iframe_src || video.url;
