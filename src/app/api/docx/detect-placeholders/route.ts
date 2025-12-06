@@ -1,10 +1,123 @@
 import { NextRequest, NextResponse } from 'next/server';  
 import "@/lib/docx/setup-jsdom";  
 import JSZip from 'jszip';  
+import { xml2js, Element } from 'xml-js';  
   
-// Función para encontrar placeholders en el texto (formato {{placeholder}})  
-const findPatchKeys = (text: string): string[] => {  
-    if (!text) return [];  
+// Tipos para el traverser  
+type ElementWrapper = {  
+    readonly element: Element;  
+    readonly index: number;  
+    readonly parent: ElementWrapper | undefined;  
+};  
+  
+type IRenderedParagraphNode = {  
+    readonly text: string;  
+    readonly pathToParagraph: readonly number[];  
+    readonly runs: readonly {  
+        readonly start: number;  
+        readonly end: number;  
+        readonly parts: readonly {  
+            readonly start: number;  
+            readonly end: number;  
+            readonly text: string;  
+        }[];  
+    }[];  
+};  
+  
+// Utilidad para convertir XML a JSON  
+const toJson = (xml: string): Element => {  
+    return xml2js(xml, {  
+        compact: false,  
+        captureSpacesBetweenElements: true,  
+        attributeValueFn: (value: string) => value,  
+    }) as Element; // ← Aserción de tipo añadida  
+};  
+  
+// Wrapper para elementos  
+const elementsToWrapper = (wrapper: ElementWrapper): readonly ElementWrapper[] =>  
+    wrapper.element.elements?.map((e, i) => ({  
+        element: e,  
+        index: i,  
+        parent: wrapper,  
+    })) ?? [];  
+  
+// Traverser - recorre el XML buscando párrafos  
+const traverse = (node: Element): readonly IRenderedParagraphNode[] => {  
+    let renderedParagraphs: readonly IRenderedParagraphNode[] = [];  
+  
+    const queue: ElementWrapper[] = [  
+        ...elementsToWrapper({  
+            element: node,  
+            index: 0,  
+            parent: undefined,  
+        }),  
+    ];  
+  
+    let currentNode: ElementWrapper | undefined;  
+    while (queue.length > 0) {  
+        currentNode = queue.shift()!;  
+  
+        if (currentNode.element.name === "w:p") {  
+            renderedParagraphs = [...renderedParagraphs, renderParagraphNode(currentNode)];  
+        }  
+        queue.push(...elementsToWrapper(currentNode));  
+    }  
+  
+    return renderedParagraphs;  
+};  
+  
+// Run Renderer - reconstruye texto de párrafos fragmentados  
+const renderParagraphNode = (wrapper: ElementWrapper): IRenderedParagraphNode => {  
+    const pathToParagraph: number[] = [];  
+    let current: ElementWrapper | undefined = wrapper;  
+      
+    while (current) {  
+        pathToParagraph.unshift(current.index);  
+        current = current.parent;  
+    }  
+  
+    const runs = wrapper.element.elements  
+        ?.filter((e): e is Element => e.type === 'element' && e.name === 'w:r')  
+        .map((runElement) => {  
+            const textParts = runElement.elements  
+                ?.filter((e): e is Element => e.type === 'element' && e.name === 'w:t')  
+                .map((textElement) => ({  
+                    text: textElement.elements?.map(e => e.type === 'text' ? e.text : '').join('') ?? '',  
+                    start: 0,  
+                    end: 0,  
+                })) ?? [];  
+  
+            let currentPos = 0;  
+            const processedParts = textParts.map(part => {  
+                const start = currentPos;  
+                currentPos += part.text.length;  
+                return {  
+                    ...part,  
+                    start,  
+                    end: currentPos,  
+                };  
+            });  
+  
+            const totalText = processedParts.map(p => p.text).join('');  
+              
+            return {  
+                start: 0,  
+                end: totalText.length,  
+                parts: processedParts,  
+            };  
+        }) ?? [];  
+  
+    const fullText = runs.map(run => run.parts.map(part => part.text).join('')).join('');  
+  
+    return {  
+        text: fullText,  
+        pathToParagraph,  
+        runs,  
+    };  
+};  
+  
+// Detector compatible con ES2015  
+const findPatchKeys = (text: string): readonly string[] => {  
     const regex = /\{\{([^}]+)\}\}/g;  
     const matches: string[] = [];  
     let match;  
@@ -14,7 +127,7 @@ const findPatchKeys = (text: string): string[] => {
     return matches;  
 };  
   
-// Detector de placeholders mejorado - extrae todo el texto del XML  
+// Detector principal  
 const patchDetector = async (data: Buffer): Promise<{  
     readonly placeholders: readonly string[];  
     readonly listPatches: readonly string[];  
@@ -23,51 +136,31 @@ const patchDetector = async (data: Buffer): Promise<{
     const patches = new Set<string>();  
     const listPatches = new Set<string>();  
   
-    // Recopilar todo el texto de todos los archivos XML relevantes  
-    let allText = "";  
-  
     for (const [key, value] of Object.entries(zipContent.files)) {  
-        // Solo procesar archivos XML en la carpeta word/  
-        if (!key.startsWith("word/") || !key.endsWith(".xml")) {  
+        if (!key.endsWith(".xml") && !key.endsWith(".rels")) {  
             continue;  
         }  
-        // Ignorar archivos de relaciones  
-        if (key.endsWith(".xml.rels")) {  
-            continue;  
-        }  
-  
-        try {  
-            const xmlContent = await value.async("text");  
-              
-            // Método 1: Extraer texto entre tags XML usando regex  
-            const textMatches = xmlContent.match(/<w:t[^>]*>([^<]*)<\/w:t>/g);  
-            if (textMatches) {  
-                textMatches.forEach(match => {  
-                    const textContent = match.replace(/<[^>]+>/g, '');  
-                    allText += textContent;  
+        if (key.startsWith("word/") && !key.endsWith(".xml.rels")) {  
+            try {  
+                const xmlContent = await value.async("text");  
+                const json = toJson(xmlContent);  
+                  
+                // Usar el traverser para encontrar párrafos y detectar placeholders  
+                traverse(json).forEach((p) => {  
+                    findPatchKeys(p.text).forEach((patch) => patches.add(patch));  
                 });  
+            } catch (err) {  
+                console.error(`Error processing ${key}:`, err);  
             }  
-              
-            // Método 2: Buscar directamente en el XML crudo  
-            const rawPlaceholders = findPatchKeys(xmlContent);  
-            rawPlaceholders.forEach(p => patches.add(p));  
-              
-        } catch (err) {  
-            console.error(`Error processing ${key}:`, err);  
         }  
     }  
   
-    // Buscar placeholders en el texto concatenado  
-    const textPlaceholders = findPatchKeys(allText);  
-    textPlaceholders.forEach(p => patches.add(p));  
-  
-    // Clasificar patches de lista  
     patches.forEach(patch => {  
         if (patch.includes("_list") || patch.includes("_numbered") || patch.includes("_bullet") || patch.includes("-list")) {  
             listPatches.add(patch);  
         }  
     });  
-      
+  
     console.log("Detected placeholders:", Array.from(patches));  
       
     return {  
@@ -90,7 +183,6 @@ export async function POST(req: NextRequest) {
   
         const templateBuffer = Buffer.from(await file.arrayBuffer());  
           
-        // Validar que es un archivo DOCX  
         if (!file.name.toLowerCase().endsWith('.docx')) {  
             return NextResponse.json({   
                 error: 'Invalid file type',  
