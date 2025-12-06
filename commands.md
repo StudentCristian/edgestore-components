@@ -128,3 +128,179 @@ curl -X POST http://localhost:3000/api/search/videos/manual \
 En `/search` hay un switch para alternar entre modos:
 - **Manual** (default): usa `/api/.../manual` - búsqueda directa
 - **IA**: usa `/api/...` - procesa query con BAML antes de buscar
+
+---
+
+# Componentes de Búsqueda - Media Selection
+
+## SearchResultsPanel
+
+Panel unificado de búsqueda con modo seleccionable para elegir media.
+
+### Props principales
+
+| Prop | Tipo | Descripción |
+|------|------|-------------|
+| `selectable` | `boolean` | Habilita modo selección |
+| `selectedImages` | `Set<string>` | Set de URLs de imágenes seleccionadas |
+| `selectedVideos` | `Set<string>` | Set de IDs de videos seleccionados |
+| `onImageSelect` | `(image: ImageResult) => void` | Callback al seleccionar imagen |
+| `onVideoSelect` | `(video: VideoResult) => void` | Callback al seleccionar video |
+| `onSearchComplete` | `(results: SearchResults) => void` | Callback al completar búsqueda (útil para limpiar selecciones) |
+| `maxImageSelection` | `number` | Límite de imágenes (default: 5) |
+| `maxVideoSelection` | `number` | Límite de videos (default: 5) |
+
+## Formato Markdown para BAML
+
+Los componentes ImageGrid y VideoGrid incluyen botón "Copy as Markdown" para copiar en formato:
+
+```markdown
+# Imágenes
+![título](url_imagen)
+
+# Videos  
+[![título](thumbnail_url)](video_url)
+```
+
+### Contexto BAML simplificado
+
+Solo se envían strings markdown (evita duplicación de datos):
+
+```json
+{
+  "images": ["![título1](url1)", "![título2](url2)"],
+  "videos": ["[![título](thumb)](url)"]
+}
+```
+
+## Ejemplo de uso (test/page.tsx)
+
+```tsx
+const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
+const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
+const [selectedImagesMarkdown, setSelectedImagesMarkdown] = useState<string[]>([]);
+const [selectedVideosMarkdown, setSelectedVideosMarkdown] = useState<string[]>([]);
+
+// Limpiar selecciones en nueva búsqueda
+const handleSearchComplete = useCallback((results: SearchResults) => {
+  setSelectedImages(new Set());
+  setSelectedVideos(new Set());
+  setSelectedImagesMarkdown([]);
+  setSelectedVideosMarkdown([]);
+}, []);
+
+const handleImageSelect = (image: ImageResult) => {
+  const markdown = `![${image.title}](${image.img_src})`;
+  const isSelected = selectedImages.has(image.img_src);
+  
+  if (isSelected) {
+    setSelectedImages((prev) => {
+      const next = new Set(prev);
+      next.delete(image.img_src);
+      return next;
+    });
+    setSelectedImagesMarkdown((prev) => prev.filter(md => md !== markdown));
+  } else {
+    setSelectedImages((prev) => new Set(prev).add(image.img_src));
+    setSelectedImagesMarkdown((prev) => [...prev, markdown]);
+  }
+};
+
+<SearchResultsPanel
+  selectable={true}
+  selectedImages={selectedImages}
+  selectedVideos={selectedVideos}
+  onImageSelect={handleImageSelect}
+  onVideoSelect={handleVideoSelect}
+  onSearchComplete={handleSearchComplete}
+  maxImageSelection={5}
+  maxVideoSelection={5}
+/>
+```
+
+---
+
+# Editor Unificado por Segmentos
+
+## Arquitectura
+
+Layout de 2 columnas:
+- **Izquierda**: Formulario (`DocumentForm`) - campos editables
+- **Derecha**: Preview (`DocumentEditor`) - vista previa con edición inline
+
+## DocumentForm
+
+Formulario que maneja campos del documento Word.
+
+### Props exportadas
+
+```tsx
+export interface FieldConfig {
+  name: string;
+  placeholder: string;
+  type: 'text' | 'image' | 'prompt';
+  required?: boolean;
+  promptConfig?: { ... };
+}
+
+export interface FormEditorState {
+  values: Record<string, string>;
+  generatedContent: Record<string, string>;
+  isGenerating: Record<string, boolean>;
+}
+```
+
+| Prop | Tipo | Descripción |
+|------|------|-------------|
+| `onStateChange` | `(state: FormEditorState) => void` | Sincroniza estado con parent |
+| `externalGeneratedContent` | `Record<string, string>` | Contenido editado desde el editor |
+
+## DocumentEditor
+
+Preview del documento con edición inline por segmentos.
+
+### Props
+
+| Prop | Tipo | Descripción |
+|------|------|-------------|
+| `fields` | `FieldConfig[]` | Configuración de campos |
+| `values` | `Record<string, string>` | Valores actuales |
+| `generatedContent` | `Record<string, string>` | Contenido generado por IA |
+| `onContentChange` | `(field, content) => void` | Callback al editar contenido |
+| `hasPromptFields` | `boolean` | Si hay campos tipo prompt |
+| `allPromptsGenerated` | `boolean` | Si todos los prompts fueron generados |
+
+### Estado en header
+
+- ✓ **Ready** (verde): Todos los prompts generados
+- ⚠ **Generate AI content first** (amarillo): Faltan prompts por generar
+
+## Ejemplo de implementación (docs/page.tsx)
+
+```tsx
+const [formState, setFormState] = useState<FormEditorState>({
+  values: {},
+  generatedContent: {},
+  isGenerating: {},
+});
+const [editorContent, setEditorContent] = useState<Record<string, string>>({});
+
+// Layout 2 columnas
+<div className="grid grid-cols-2 gap-6">
+  <DocumentForm
+    fields={fields}
+    onStateChange={setFormState}
+    externalGeneratedContent={editorContent}
+  />
+  <DocumentEditor
+    fields={fields}
+    values={formState.values}
+    generatedContent={formState.generatedContent}
+    onContentChange={(field, content) => {
+      setEditorContent(prev => ({ ...prev, [field]: content }));
+    }}
+    hasPromptFields={hasPromptFields}
+    allPromptsGenerated={allPromptsGenerated}
+  />
+</div>
+```

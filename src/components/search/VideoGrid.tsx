@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import Lightbox, { GenericSlide } from 'yet-another-react-lightbox';
-import { Plus, Play, ExternalLink, VideoIcon, Check } from 'lucide-react';
+import { Plus, Play, ExternalLink, VideoIcon, Check, Copy, CheckCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from '@/components/ui/use-toast';
 
 // Declaración de tipo personalizado para video slides
 declare module 'yet-another-react-lightbox' {
@@ -57,9 +58,24 @@ export default function VideoGrid({
 }: VideoGridProps) {
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const [showAll, setShowAll] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const videoRefs = useRef<(HTMLIFrameElement | null)[]>([]);
 
   const displayVideos = showAll ? videos : videos.slice(0, initialVisible);
+
+  // Copiar video como Markdown (imagen clickeable que lleva al video)
+  const copyAsMarkdown = async (video: VideoResult, index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Formato: imagen thumbnail que es link al video
+    const markdown = `[![${video.title}](${video.img_src})](${video.url})`;
+    await navigator.clipboard.writeText(markdown);
+    setCopiedIndex(index);
+    toast({
+      title: "Copied as Markdown",
+      description: `Video "${video.title.slice(0, 30)}..." copied to clipboard`,
+    });
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
   const hasMoreVideos = videos.length > initialVisible;
 
   // Pausar videos al cambiar de slide
@@ -172,18 +188,35 @@ export default function VideoGrid({
                 <h3 className="text-sm font-medium line-clamp-2 mb-2">
                   {video.title}
                 </h3>
-                {showSource && (
-                  <a
-                    href={video.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
-                    onClick={(e) => e.stopPropagation()}
+                <div className="flex items-center justify-between">
+                  {showSource && (
+                    <a
+                      href={video.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Watch on YouTube
+                    </a>
+                  )}
+                  <span
+                    onClick={(e) => copyAsMarkdown(video, index, e)}
+                    className={cn(
+                      "text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 cursor-pointer",
+                      copiedIndex === index && "!text-green-600"
+                    )}
+                    title="Copy as Markdown"
+                    role="button"
                   >
-                    <ExternalLink className="h-3 w-3" />
-                    Watch on YouTube
-                  </a>
-                )}
+                    {copiedIndex === index ? (
+                      <><CheckCheck className="h-3 w-3" /> Copied</>
+                    ) : (
+                      <><Copy className="h-3 w-3" /> Copy</>
+                    )}
+                  </span>
+                </div>
               </CardContent>
             </Card>
           );

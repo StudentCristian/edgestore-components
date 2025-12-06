@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { SearchResultsPanel, ImageResult, VideoResult } from '@/components/search';
+import { useState, useCallback } from 'react';
+import { SearchResultsPanel, ImageResult, VideoResult, SearchResults } from '@/components/search';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -10,30 +10,55 @@ export default function TestPanel() {
   const [selectable, setSelectable] = useState(true);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [selectedVideos, setSelectedVideos] = useState<Set<string>>(new Set());
+  // Solo guardar el markdown para BAML (más eficiente)
+  const [selectedImagesMarkdown, setSelectedImagesMarkdown] = useState<string[]>([]);
+  const [selectedVideosMarkdown, setSelectedVideosMarkdown] = useState<string[]>([]);
+
+  // Limpiar selecciones cuando se hace una nueva búsqueda
+  const handleSearchComplete = useCallback((results: SearchResults) => {
+    setSelectedImages(new Set());
+    setSelectedVideos(new Set());
+    setSelectedImagesMarkdown([]);
+    setSelectedVideosMarkdown([]);
+  }, []);
 
   const handleImageSelect = (image: ImageResult) => {
-    setSelectedImages((prev) => {
-      const next = new Set(prev);
-      if (next.has(image.img_src)) {
+    const markdown = `![${image.title}](${image.img_src})`;
+    const isSelected = selectedImages.has(image.img_src);
+    
+    if (isSelected) {
+      // Deseleccionar
+      setSelectedImages((prev) => {
+        const next = new Set(prev);
         next.delete(image.img_src);
-      } else {
-        next.add(image.img_src);
-      }
-      return next;
-    });
+        return next;
+      });
+      setSelectedImagesMarkdown((prev) => prev.filter(md => md !== markdown));
+    } else {
+      // Seleccionar
+      setSelectedImages((prev) => new Set(prev).add(image.img_src));
+      setSelectedImagesMarkdown((prev) => [...prev, markdown]);
+    }
   };
 
   const handleVideoSelect = (video: VideoResult) => {
     const videoId = video.iframe_src || video.url;
-    setSelectedVideos((prev) => {
-      const next = new Set(prev);
-      if (next.has(videoId)) {
+    const markdown = `[![${video.title}](${video.img_src})](${video.url})`;
+    const isSelected = selectedVideos.has(videoId);
+    
+    if (isSelected) {
+      // Deseleccionar
+      setSelectedVideos((prev) => {
+        const next = new Set(prev);
         next.delete(videoId);
-      } else {
-        next.add(videoId);
-      }
-      return next;
-    });
+        return next;
+      });
+      setSelectedVideosMarkdown((prev) => prev.filter(md => md !== markdown));
+    } else {
+      // Seleccionar
+      setSelectedVideos((prev) => new Set(prev).add(videoId));
+      setSelectedVideosMarkdown((prev) => [...prev, markdown]);
+    }
   };
 
   return (
@@ -73,24 +98,43 @@ export default function TestPanel() {
           selectedVideos={selectedVideos}
           onImageSelect={handleImageSelect}
           onVideoSelect={handleVideoSelect}
+          onSearchComplete={handleSearchComplete}
           maxImageSelection={5}
           maxVideoSelection={5}
         />
       </div>
 
       {selectable && (selectedImages.size > 0 || selectedVideos.size > 0) && (
-        <div className="p-4 border rounded-lg bg-muted/50">
-          <h3 className="font-medium mb-2">Selected Media (for BAML context)</h3>
-          <pre className="text-xs overflow-auto max-h-40">
-            {JSON.stringify(
-              {
-                images: Array.from(selectedImages),
-                videos: Array.from(selectedVideos),
-              },
-              null,
-              2
-            )}
-          </pre>
+        <div className="p-4 border rounded-lg bg-muted/50 space-y-4">
+          <h3 className="font-medium">Selected Media (for BAML context)</h3>
+          
+          {/* Contexto Markdown para BAML - simple y eficiente */}
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-1">BAML Context (Markdown only):</h4>
+            <pre className="text-xs overflow-auto max-h-32 p-2 bg-background rounded border">
+              {JSON.stringify(
+                {
+                  images: selectedImagesMarkdown,
+                  videos: selectedVideosMarkdown,
+                },
+                null,
+                2
+              )}
+            </pre>
+          </div>
+
+          {/* Preview Markdown generado */}
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-1">Markdown Preview:</h4>
+            <div className="text-xs p-2 bg-background rounded border space-y-1 font-mono">
+              {selectedImagesMarkdown.map((md, i) => (
+                <div key={`img-${i}`} className="text-green-600 dark:text-green-400">{md}</div>
+              ))}
+              {selectedVideosMarkdown.map((md, i) => (
+                <div key={`vid-${i}`} className="text-blue-600 dark:text-blue-400">{md}</div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

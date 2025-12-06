@@ -8,7 +8,7 @@ Crear una experiencia de generación de documentos donde:
 2. **Primero se muestran los resultados en el panel de búsqueda**
 3. Se envían máximo 10 resultados (5 imágenes + 5 videos) a BAML como contexto
 4. **La IA genera contenido con streaming**, mostrándose progresivamente en el editor
-5. El previsualizador renderiza el resultado final en markdown
+5. El previsualizador renderiza el resultado final en markdown (con Mathpix-Markdown-it)
 
 ---
 

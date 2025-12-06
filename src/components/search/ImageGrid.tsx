@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import Lightbox from 'yet-another-react-lightbox';
-import { Plus, ExternalLink, ImageIcon, Check } from 'lucide-react';
+import { Plus, ExternalLink, ImageIcon, Check, Copy, CheckCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from '@/components/ui/use-toast';
 
 export interface ImageResult {
   img_src: string;
@@ -43,8 +44,22 @@ export default function ImageGrid({
 }: ImageGridProps) {
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const [showAll, setShowAll] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const displayImages = showAll ? images : images.slice(0, initialVisible);
+
+  // Copiar imagen como Markdown
+  const copyAsMarkdown = async (image: ImageResult, index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const markdown = `![${image.title}](${image.img_src})`;
+    await navigator.clipboard.writeText(markdown);
+    setCopiedIndex(index);
+    toast({
+      title: "Copied as Markdown",
+      description: `Image "${image.title.slice(0, 30)}..." copied to clipboard`,
+    });
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
   const hasMoreImages = images.length > initialVisible;
 
   // Preparar slides para el lightbox
@@ -122,6 +137,7 @@ export default function ImageGrid({
                   )}
                   loading="lazy"
                 />
+                {/* Selection indicator */}
                 {selectable && isSelected && (
                   <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
                     <Check className="h-3 w-3" />
@@ -130,18 +146,35 @@ export default function ImageGrid({
               </div>
               <CardContent className="p-2">
                 <h3 className="text-xs font-medium line-clamp-1">{image.title}</h3>
-                {showSource && (
-                  <a
-                    href={image.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mt-1"
-                    onClick={(e) => e.stopPropagation()}
+                <div className="flex items-center justify-between mt-1">
+                  {showSource && (
+                    <a
+                      href={image.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink className="h-2.5 w-2.5" />
+                      Source
+                    </a>
+                  )}
+                  <span
+                    onClick={(e) => copyAsMarkdown(image, index, e)}
+                    className={cn(
+                      "text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 cursor-pointer",
+                      copiedIndex === index && "!text-green-600"
+                    )}
+                    title="Copy as Markdown"
+                    role="button"
                   >
-                    <ExternalLink className="h-2.5 w-2.5" />
-                    Source
-                  </a>
-                )}
+                    {copiedIndex === index ? (
+                      <><CheckCheck className="h-2.5 w-2.5" /> Copied</>
+                    ) : (
+                      <><Copy className="h-2.5 w-2.5" /> Copy</>
+                    )}
+                  </span>
+                </div>
               </CardContent>
             </Card>
           );
