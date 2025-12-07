@@ -30,7 +30,7 @@ const toJson = (xml: string): Element => {
         compact: false,  
         captureSpacesBetweenElements: true,  
         attributeValueFn: (value: string) => value,  
-    }) as Element; // ← Aserción de tipo añadida  
+    }) as Element; 
 };  
   
 // Wrapper para elementos  

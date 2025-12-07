@@ -3,8 +3,7 @@ import './globals.css';
 import { ModeToggle, ThemeProvider } from '@/components/theme-provider';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { Tabs } from './tabs';
-import { Toaster } from '@/components/ui/toaster'; // Actualizado a toaster.tsx
+import { Toaster } from '@/components/ui/toaster';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,10 +23,6 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <div className="m-6 flex flex-col gap-3">
             <div className="flex flex-row items-center gap-3">
-              <div className="hidden flex-1 sm:block" />
-              <div className="flex flex-1 sm:justify-center">
-                <Tabs />
-              </div>
               <div className="flex flex-1 justify-end">
                 <ModeToggle />
               </div>
