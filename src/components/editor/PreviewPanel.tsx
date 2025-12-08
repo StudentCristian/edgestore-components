@@ -125,6 +125,23 @@ export function PreviewPanel({ html }: PreviewPanelProps) {
           & p {
             margin: 0.75rem 0;
             line-height: 1.7;
+            white-space: pre-wrap;      /* Preservar espacios y saltos de línea */
+            word-wrap: break-word;       /* Romper palabras largas */
+          }
+          
+          /* Preservar espacios en blanco y saltos de línea */
+          & br {
+            display: block;
+            content: "";
+            margin-top: 0.25rem;
+          }
+          
+          /* Contenedor principal preserva espacios */
+          white-space: pre-wrap;
+          
+          /* Espaciado entre elementos */
+          & > * + * {
+            margin-top: 0.75rem;
           }
           
           /* Líneas horizontales */

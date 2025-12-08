@@ -88,7 +88,7 @@ const FileList = React.forwardRef<
                         onClick={() => {
                           removeFile(key);
                         }}
-                        title="Remove"
+                        title="Eliminar"
                       >
                         <Trash2Icon className="block h-4 w-4 shrink-0" />
                       </button>

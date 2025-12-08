@@ -222,7 +222,7 @@ export function DynamicDocumentForm({
     
   return (  
     <div className="mt-8 w-full">  
-      <h3 className="mb-4 text-lg font-semibold">Generate Document</h3>  
+      <h3 className="mb-4 text-lg font-semibold">Generar Documento</h3>  
       <div className="rounded-md border border-gray-200 p-4 dark:border-gray-800">  
         <Form {...form}>  
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">  
@@ -237,7 +237,7 @@ export function DynamicDocumentForm({
                       <FormLabel className="text-foreground">{tag}</FormLabel>  
                       <FormControl>  
                         <Input     
-                          placeholder={`Enter ${tag}`}     
+                          placeholder={`Ingresa ${tag}`}     
                           {...field}     
                           value={field.value ?? ''}     
                         />  
@@ -258,7 +258,7 @@ export function DynamicDocumentForm({
                 disabled={isGenerating}  
               >    
                 <FileTextIcon className="h-4 w-4 mr-2" />  
-                {isGenerating ? 'Generating...' : 'Generate (Old)'}  
+                {isGenerating ? 'Generando...' : 'Generar (Antiguo)'}  
               </Button>  
                   
               {/* Nuevo botón Download DOCX */}  
@@ -268,7 +268,7 @@ export function DynamicDocumentForm({
                 className="flex-1"  
               >  
                 <Download className="h-4 w-4 mr-2" />  
-                {isDownloading ? 'Generando...' : 'Download DOCX'}  
+                {isDownloading ? 'Generando...' : 'Descargar DOCX'}  
               </Button>  
             </div>  
           </form>  

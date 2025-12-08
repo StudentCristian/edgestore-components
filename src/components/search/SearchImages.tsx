@@ -45,13 +45,13 @@ export default function SearchImages({ useAI = true }: SearchImagesProps) {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search for images..."
+          placeholder="Buscar imágenes..."
           onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           className="flex-1"
         />
         <Button onClick={handleSearch} disabled={isLoading}>
           <Search className="h-4 w-4 mr-2" />
-          Search
+          Buscar
         </Button>
       </div>
 
@@ -61,7 +61,7 @@ export default function SearchImages({ useAI = true }: SearchImagesProps) {
         isLoading={isLoading}
         initialVisible={3}
         skeletonCount={6}
-        emptyMessage={searchedQuery ? `No images found for "${searchedQuery}"` : undefined}
+        emptyMessage={searchedQuery ? `No se encontraron imágenes para "${searchedQuery}"` : undefined}
         className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
       />
     </div>

@@ -1,26 +1,25 @@
 "use client"
-import { useSegmentedContent, type InitialContent } from "@/hooks/useSegmentedContent"
+import { useSegmentedContent, type InitialContent, type Segment } from "@/hooks/useSegmentedContent"
 import { EditorSegment } from "./EditorSegment"
 import { PreviewPanel } from "./PreviewPanel"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Eye, Code } from "lucide-react"
 import { useState, useEffect } from "react"
 
 interface SegmentedEditorProps {
   placeholders: string[]
   initialContent?: InitialContent
-  onContentChange?: (markdown: string) => void
+  onContentChange?: (markdown: string, segments: Segment[]) => void
 }
 
 export function SegmentedEditor({ placeholders, initialContent = {}, onContentChange }: SegmentedEditorProps) {
   const { segments, updateSegmentMarkdown, markdown, combinedHtml } = useSegmentedContent(placeholders, initialContent)
   const [showPreview, setShowPreview] = useState(true)
 
-  // Notify parent when markdown changes
+  // Notify parent when markdown changes - includes segments for reliable content extraction
   useEffect(() => {
-    onContentChange?.(markdown)
-  }, [markdown, onContentChange])
+    onContentChange?.(markdown, segments)
+  }, [markdown, segments, onContentChange])
 
   const handleSegmentChange = (placeholder: string, newMarkdown: string) => {
     updateSegmentMarkdown(placeholder, newMarkdown)
@@ -37,15 +36,13 @@ export function SegmentedEditor({ placeholders, initialContent = {}, onContentCh
             className="h-7 px-2 text-xs gap-1.5"
           >
             {showPreview ? <Eye className="h-3.5 w-3.5" /> : <Code className="h-3.5 w-3.5" />}
-            {showPreview ? "Preview" : "Solo editor"}
+            {showPreview ? "Vista previa" : "Solo editor"}
           </Button>
-          <Badge variant="secondary" className="text-xs">
-            {segments.length} campos
-          </Badge>
         </div>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
+        {/* Editor area */}
         <div className={`${showPreview ? "w-1/2" : "w-full"} border-r border-border overflow-auto bg-card`}>
           {segments.map((segment, index) => (
             <EditorSegment
@@ -55,6 +52,8 @@ export function SegmentedEditor({ placeholders, initialContent = {}, onContentCh
               onContentChange={(md) => handleSegmentChange(segment.placeholder, md)}
               isFirst={index === 0}
               isLast={index === segments.length - 1}
+              segmentNumber={index + 1}
+              totalSegments={segments.length}
             />
           ))}
         </div>

@@ -77,7 +77,7 @@ retry_policy Exponential {
 client<llm> Gemini { 
   provider google-ai
   options {
-    model "gemini-2.0-flash"
+    model "gemini-2.5-flash-lite"
     api_key env.GOOGLE_API_KEY
     generationConfig {
       max_output_tokens 8192          

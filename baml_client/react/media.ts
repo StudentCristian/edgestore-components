@@ -495,3 +495,4 @@ const PdfImpl = new Proxy(
 export type Pdf = BamlPdf;
 // Then export the implementations
 export { PdfImpl as Pdf };
+

@@ -20,6 +20,7 @@ Para cada campo solicitado, genera contenido EXTENSO siguiendo estas pautas:
 - Desarrolla cada idea completamente
 - Usa subtemas y puntos clave
 - Proporciona explicaciones profundas
+- Si hay RECURSOS MULTIMEDIA en el contexto, INCLÚYELOS en el contenido generado usando el formato Markdown exacto proporcionado
 
 {{ _.role('user') }}
 {{ fields_data }}
@@ -30,6 +31,7 @@ IMPORTANTE:
 - INCLUYE detalles, ejemplos y explicaciones
 - ESTRUCTURA el contenido con subtemas cuando sea apropiado
 - Cada sección debe ser SUSTANCIAL y COMPLETA
+- Si se proporcionaron recursos multimedia (imágenes/videos), DEBES incluirlos en el contenido usando su formato Markdown exacto
 
 ---
 {{ ctx.output_format }}

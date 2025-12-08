@@ -48,7 +48,7 @@ export default function VideoGrid({
   isLoading = false,
   initialVisible = 3,
   skeletonCount = 4,
-  emptyMessage = 'No videos found',
+  emptyMessage = 'No se encontraron videos',
   showSource = true,
   selectable = false,
   selectedVideos = new Set(),
@@ -73,14 +73,14 @@ export default function VideoGrid({
       await navigator.clipboard.writeText(markdown);
       setCopiedIndex(index);
       toast({
-        title: "Copied as Markdown",
-        description: `Video "${video.title.slice(0, 30)}..." copied to clipboard`,
+        title: "Copiado",
+        description: `Video "${video.title.slice(0, 30)}..." copiado al portapapeles`,
       });
     } catch (error) {
       console.error('Clipboard error:', error);
       toast({
-        title: "Copy failed",
-        description: "Could not copy to clipboard. Try using HTTPS.",
+        title: "Error al copiar",
+        description: "No se pudo copiar. Asegúrate de usar HTTPS.",
         variant: "destructive",
       });
     }
@@ -140,11 +140,11 @@ export default function VideoGrid({
 
   if (isLoading) {
     return (
-      <div className={cn('grid grid-cols-1 sm:grid-cols-2 gap-3', className)}>
+      <div className={cn('grid grid-cols-1 gap-4', className)}>
         {[...Array(skeletonCount)].map((_, i) => (
           <Card key={i} className="overflow-hidden">
             <Skeleton className="aspect-video w-full" />
-            <CardContent className="p-2">
+            <CardContent className="p-3">
               <Skeleton className="h-3 w-full" />
             </CardContent>
           </Card>
@@ -163,8 +163,8 @@ export default function VideoGrid({
   }
 
   return (
-    <div className="space-y-3">
-      <div className={cn('grid grid-cols-1 sm:grid-cols-2 gap-3', className)}>
+    <div className="space-y-4">
+      <div className={cn('grid grid-cols-1 gap-4', className)}>
         {displayVideos.map((video, index) => {
           const videoId = getVideoId(video);
           const isSelected = selectedVideos.has(videoId);
@@ -214,7 +214,7 @@ export default function VideoGrid({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <ExternalLink className="h-3 w-3" />
-                      Watch on YouTube
+                      Ver en YouTube
                     </a>
                   )}
                   <span
@@ -223,13 +223,13 @@ export default function VideoGrid({
                       "text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 cursor-pointer",
                       copiedIndex === index && "!text-green-600"
                     )}
-                    title="Copy as Markdown"
+                    title="Copiar como Markdown"
                     role="button"
                   >
                     {copiedIndex === index ? (
-                      <><CheckCheck className="h-3 w-3" /> Copied</>
+                      <><CheckCheck className="h-3 w-3" /> Copiado</>
                     ) : (
-                      <><Copy className="h-3 w-3" /> Copy</>
+                      <><Copy className="h-3 w-3" /> Copiar</>
                     )}
                   </span>
                 </div>
@@ -249,7 +249,7 @@ export default function VideoGrid({
             className="gap-1.5"
           >
             <Plus className="h-3.5 w-3.5" />
-            View {videos.length - initialVisible} more
+            Ver {videos.length - initialVisible} más
           </Button>
         </div>
       )}
@@ -266,6 +266,7 @@ export default function VideoGrid({
           index={lightboxIndex}
           on={{
             view: ({ index: viewIndex }) => {
+              // Pausar video anterior
               const previousIframe = videoRefs.current[lightboxIndex];
               if (previousIframe?.contentWindow) {
                 previousIframe.contentWindow.postMessage(
@@ -273,6 +274,8 @@ export default function VideoGrid({
                   '*'
                 );
               }
+              // Actualizar índice para sincronizar navegación
+              setLightboxIndex(viewIndex);
             }
           }}
           render={{

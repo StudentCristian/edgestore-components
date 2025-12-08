@@ -67,28 +67,28 @@ function ReactHookFormExample() {
         className="flex flex-col gap-4"
       >
         <div className="flex w-full flex-col gap-1.5">
-          <Label htmlFor="text-field">Text Field</Label>
+          <Label htmlFor="text-field">Campo de Texto</Label>
           <Input
             {...register('text')}
             id="text-field"
-            placeholder="Some text field"
+            placeholder="Escribe algo aquí"
           />
         </div>
         <div className="flex w-full flex-col gap-1.5">
-          <Label htmlFor="text-field">Upload Input</Label>
+          <Label htmlFor="text-field">Subir Archivos</Label>
           <UploadInput control={control} name="files" />
         </div>
-        <Button>Submit</Button>
+        <Button>Enviar</Button>
       </form>
       {submitValues && (
         <div className="mt-4 w-full">
-          <h3 className="text-base font-bold">Submitted Values</h3>
+          <h3 className="text-base font-bold">Valores Enviados</h3>
           <CodeBlock>{JSON.stringify(submitValues, null, 2)}</CodeBlock>
         </div>
       )}
       {Object.keys(errors).length > 0 && (
         <div className="mt-4">
-          <h3 className="text-base font-bold">Errors</h3>
+          <h3 className="text-base font-bold">Errores</h3>
           <CodeBlock>{JSON.stringify(errors, null, 2)}</CodeBlock>
         </div>
       )}
@@ -141,7 +141,7 @@ function UploadInput<T extends FieldValues>(props: UseControllerProps<T>) {
 function MultiFileInstantDetails() {
   return (
     <div className="flex flex-col">
-      <h3 className="mt-4 text-base font-bold">See in GitHub</h3>
+      <h3 className="mt-4 text-base font-bold">Ver en GitHub</h3>
       <ul className="text-foreground/80 text-sm">
         <li>
           <a
@@ -150,7 +150,7 @@ function MultiFileInstantDetails() {
             className="underline"
             rel="noreferrer"
           >
-            Usage
+            Uso
           </a>
         </li>
         <li>
@@ -160,14 +160,14 @@ function MultiFileInstantDetails() {
             rel="noreferrer"
             className="underline"
           >
-            Component
+            Componente
           </a>
         </li>
       </ul>
-      <h3 className="mt-4 text-base font-bold">About</h3>
+      <h3 className="mt-4 text-base font-bold">Acerca de</h3>
       <div className="text-foreground/80 flex flex-col gap-2 text-sm">
         <p>
-          This example demonstrates how to use EdgeStore with{' '}
+          Este ejemplo muestra cómo usar EdgeStore con{' '}
           <a
             href="https://react-hook-form.com/"
             target="_blank"
@@ -179,8 +179,8 @@ function MultiFileInstantDetails() {
           .
         </p>
         <p>
-          It uses the same component as the multi-file-instant example, but it
-          is wrapped in a way that it can be easily used with React Hook Form.
+          Utiliza el mismo componente del ejemplo multi-file-instant, pero
+          envuelto de forma que sea fácil de usar con React Hook Form.
         </p>
       </div>
     </div>

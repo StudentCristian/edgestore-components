@@ -61,7 +61,7 @@ function TagsExample() {
       const response = await fetch('/api/files');
 
       if (!response.ok) {
-        throw new Error('Error fetching files');
+        throw new Error('Error al obtener archivos');
       }
 
       const data = await response.json();
@@ -108,19 +108,19 @@ function TagsExample() {
     try {
       // Only process .docx files
       if (!file.filename.toLowerCase().endsWith('.docx')) {
-        throw new Error('Only Word (.docx) documents are supported');
+        throw new Error('Solo se permiten documentos Word (.docx)');
       }
       
       // Fetch the document content
       const response = await fetch(file.url);
       if (!response.ok) {
-        throw new Error('Failed to download the document');
+        throw new Error('Error al descargar el documento');
       }
       
       // Convert response to ArrayBuffer
       const arrayBuffer = await response.arrayBuffer();
       if (arrayBuffer.byteLength === 0) {
-        throw new Error('Downloaded file is empty');
+        throw new Error('El archivo descargado está vacío');
       }
       const content = new Uint8Array(arrayBuffer);
       
@@ -148,7 +148,7 @@ function TagsExample() {
       if (error instanceof Error && 'properties' in error) {
         console.error('Sub-errors:', (error as any).properties?.errors);
       }
-      setProcessingError(error instanceof Error ? error.message : 'Unknown error processing document');
+      setProcessingError(error instanceof Error ? error.message : 'Error desconocido al procesar documento');
     } finally {
       setIsProcessing(false);
     }
@@ -175,7 +175,7 @@ function TagsExample() {
               }
             >
               <UploadCloudIcon className="h-4 w-4" />
-              <span>{isUploading ? 'Uploading...' : 'Upload Files'}</span>
+              <span>{isUploading ? 'Subiendo...' : 'Subir Archivos'}</span>
             </Button>
 
             <CompletedFiles />
@@ -203,14 +203,14 @@ function TagsExample() {
               selectedFile={selectedFile}
               onGenerateStart={() => {
                 toast({
-                  title: "Generating document...",
-                  description: "Please wait while your document is being generated."
+                  title: "Generando documento...",
+                  description: "Por favor espera mientras se genera tu documento."
                 });
               }}
               onGenerateComplete={(url, filename) => {
                 toast({
-                  title: "Document generated successfully!",
-                  description: `Your document '${filename}' has been downloaded.`,
+                  title: "¡Documento generado!",
+                  description: `Tu documento '${filename}' se ha descargado.`,
                   variant: "success"
                 });
                 setGeneratedDocs(prev => [
@@ -220,7 +220,7 @@ function TagsExample() {
               }}
               onGenerateError={(error) => {
                 toast({
-                  title: "Error generating document",
+                  title: "Error al generar documento",
                   description: error,
                   variant: "destructive"
                 });
@@ -246,7 +246,7 @@ function CompletedFiles() {
 
   return (
     <div className="mt-8 w-full">
-      <h3 className="mb-2 text-lg font-semibold">Uploaded Files</h3>
+      <h3 className="mb-2 text-lg font-semibold">Archivos Subidos</h3>
       <div className="rounded-md bg-gray-50 p-4 dark:bg-gray-900">
         {completedFiles.map((res) => (
           <a
@@ -282,7 +282,7 @@ function StoredFilesWithSelection({
     return (
       <div className="mt-8 w-full">
         <div className="flex items-center justify-between">
-          <h3 className="mb-2 text-lg font-semibold">Stored Files</h3>
+          <h3 className="mb-2 text-lg font-semibold">Archivos Guardados</h3>
           <Button
             variant="ghost"
             size="sm"
@@ -293,7 +293,7 @@ function StoredFilesWithSelection({
           </Button>
         </div>
         <div className="rounded-md bg-gray-50 p-4 dark:bg-gray-900">
-          <p className="text-muted-foreground">Loading files...</p>
+          <p className="text-muted-foreground">Cargando archivos...</p>
         </div>
       </div>
     );
@@ -303,7 +303,7 @@ function StoredFilesWithSelection({
     return (
       <div className="mt-8 w-full">
         <div className="flex items-center justify-between">
-          <h3 className="mb-2 text-lg font-semibold">Stored Files</h3>
+          <h3 className="mb-2 text-lg font-semibold">Archivos Guardados</h3>
           <Button
             variant="ghost"
             size="sm"
@@ -313,7 +313,7 @@ function StoredFilesWithSelection({
           </Button>
         </div>
         <div className="rounded-md bg-gray-50 p-4 dark:bg-gray-900">
-          <p className="text-muted-foreground">No stored files</p>
+          <p className="text-muted-foreground">No hay archivos guardados</p>
         </div>
       </div>
     );
@@ -322,7 +322,7 @@ function StoredFilesWithSelection({
   return (
     <div className="mt-8 w-full">
       <div className="flex items-center justify-between">
-        <h3 className="mb-2 text-lg font-semibold">Stored Files</h3>
+        <h3 className="mb-2 text-lg font-semibold">Archivos Guardados</h3>
         <Button
           variant="ghost"
           size="sm"
@@ -345,7 +345,7 @@ function StoredFilesWithSelection({
                 size="sm"
                 onClick={() => onFileSelect(file)}
                 className="p-1"
-                title="Extract Tags"
+                title="Extraer Campos"
               >
                 <TagIcon className="h-4 w-4" />
               </Button>
@@ -386,10 +386,10 @@ function DocumentTagsDisplay({
 
   return (
     <div className="mt-8 w-full">
-      <h3 className="mb-2 text-lg font-semibold">Document Tags</h3>
+      <h3 className="mb-2 text-lg font-semibold">Campos del Documento</h3>
       <div className="rounded-md bg-gray-50 p-4 dark:bg-gray-900">
         {isProcessing && (
-          <p className="text-muted-foreground">Processing document...</p>
+          <p className="text-muted-foreground">Procesando documento...</p>
         )}
         
         {error && (
@@ -399,12 +399,12 @@ function DocumentTagsDisplay({
         )}
         
         {tags && Object.keys(tags).length === 0 && !isProcessing && !error && (
-          <p className="text-muted-foreground">No tags found in document.</p>
+          <p className="text-muted-foreground">No se encontraron campos en el documento.</p>
         )}
         
         {tags && Object.keys(tags).length > 0 && (
           <div>
-            <h4 className="mb-2 font-medium">Placeholders found in {selectedFile.filename}:</h4>
+            <h4 className="mb-2 font-medium">Campos encontrados en {selectedFile.filename}:</h4>
             <ul className="list-disc pl-5">
               {Object.keys(tags).map((tag) => (
                 <li key={tag} className="mb-1">
@@ -424,7 +424,7 @@ function DocumentTagsDisplay({
 function TagsDetails() {
   return (
     <div className="flex flex-col">
-      <h3 className="mt-4 text-base font-bold">Document Tag Extractor</h3>
+      <h3 className="mt-4 text-base font-bold">Extractor de Campos</h3>
       <ul className="text-sm text-foreground/80">
         <li>
           <a
@@ -433,23 +433,23 @@ function TagsDetails() {
             rel="noreferrer"
             className="underline"
           >
-            Docxtemplater Documentation
+            Documentación de Docxtemplater
           </a>
         </li>
       </ul>
-      <h3 className="mt-4 text-base font-bold">About</h3>
+      <h3 className="mt-4 text-base font-bold">Acerca de</h3>
       <div className="flex flex-col gap-2 text-sm text-foreground/80">
         <p>
-          This component allows you to upload .docx files and extract placeholder tags from them.
-          You can upload up to 5 files with a maximum size of 5 MB each.
+          Este componente permite subir archivos .docx y extraer los campos (variables) de ellos.
+          Puedes subir hasta 5 archivos con un tamaño máximo de 5 MB cada uno.
         </p>
         <p>
-          After uploading files, click the tag icon next to a file in the "Stored Files" list
-          to extract and display all placeholders (template variables) from the document.
+          Después de subir los archivos, haz clic en el icono de etiqueta junto al archivo
+          para extraer y mostrar todos los campos del documento.
         </p>
         <p>
-          This is useful when working with document templates to identify all variables
-          that need to be replaced before generating the final document.
+          Esto es útil al trabajar con plantillas para identificar todas las variables
+          que deben ser reemplazadas antes de generar el documento final.
         </p>
       </div>
     </div>

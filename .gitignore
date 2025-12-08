@@ -36,3 +36,6 @@ template.docx
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# baml carpeta
+/baml_client/

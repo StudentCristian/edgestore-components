@@ -34,7 +34,7 @@ export default function ImageGrid({
   isLoading = false,
   initialVisible = 3,
   skeletonCount = 6,
-  emptyMessage = 'No images found',
+  emptyMessage = 'No se encontraron imágenes',
   showSource = true,
   selectable = false,
   selectedImages = new Set(),
@@ -57,14 +57,14 @@ export default function ImageGrid({
       await navigator.clipboard.writeText(markdown);
       setCopiedIndex(index);
       toast({
-        title: "Copied as Markdown",
-        description: `Image "${image.title.slice(0, 30)}..." copied to clipboard`,
+        title: "Copiado",
+        description: `Imagen "${image.title.slice(0, 30)}..." copiada al portapapeles`,
       });
     } catch (error) {
       console.error('Clipboard error:', error);
       toast({
-        title: "Copy failed",
-        description: "Could not copy to clipboard. Try using HTTPS.",
+        title: "Error al copiar",
+        description: "No se pudo copiar. Asegúrate de usar HTTPS.",
         variant: "destructive",
       });
     }
@@ -98,11 +98,11 @@ export default function ImageGrid({
 
   if (isLoading) {
     return (
-      <div className={cn('grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3', className)}>
+      <div className={cn('grid grid-cols-2 gap-4', className)}>
         {[...Array(skeletonCount)].map((_, i) => (
           <Card key={i} className="overflow-hidden">
             <Skeleton className="aspect-square w-full" />
-            <CardContent className="p-2">
+            <CardContent className="p-3">
               <Skeleton className="h-3 w-full" />
             </CardContent>
           </Card>
@@ -121,8 +121,8 @@ export default function ImageGrid({
   }
 
   return (
-    <div className="space-y-3">
-      <div className={cn('grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3', className)}>
+    <div className="space-y-4">
+      <div className={cn('grid grid-cols-2 gap-4', className)}>
         {displayImages.map((image, index) => {
           const isSelected = selectedImages.has(image.img_src);
           const canSelect = selectable && (isSelected || selectedImages.size < maxSelection);
@@ -155,34 +155,34 @@ export default function ImageGrid({
                   </div>
                 )}
               </div>
-              <CardContent className="p-2">
-                <h3 className="text-xs font-medium line-clamp-1">{image.title}</h3>
-                <div className="flex items-center justify-between mt-1">
+              <CardContent className="p-3">
+                <h3 className="text-xs font-medium line-clamp-1 mb-1.5">{image.title}</h3>
+                <div className="flex items-center justify-between">
                   {showSource && (
                     <a
                       href={image.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                      className="text-[10px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <ExternalLink className="h-2.5 w-2.5" />
-                      Source
+                      Fuente
                     </a>
                   )}
                   <span
                     onClick={(e) => copyAsMarkdown(image, index, e)}
                     className={cn(
-                      "text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 cursor-pointer",
+                      "text-[10px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 cursor-pointer",
                       copiedIndex === index && "!text-green-600"
                     )}
-                    title="Copy as Markdown"
+                    title="Copiar como Markdown"
                     role="button"
                   >
                     {copiedIndex === index ? (
-                      <><CheckCheck className="h-2.5 w-2.5" /> Copied</>
+                      <><CheckCheck className="h-2.5 w-2.5" /> Copiado</>
                     ) : (
-                      <><Copy className="h-2.5 w-2.5" /> Copy</>
+                      <><Copy className="h-2.5 w-2.5" /> Copiar</>
                     )}
                   </span>
                 </div>
@@ -202,7 +202,7 @@ export default function ImageGrid({
             className="gap-1.5"
           >
             <Plus className="h-3.5 w-3.5" />
-            View {images.length - initialVisible} more
+            Ver {images.length - initialVisible} más
           </Button>
         </div>
       )}
@@ -214,6 +214,9 @@ export default function ImageGrid({
           open={lightboxIndex >= 0}
           index={lightboxIndex}
           close={() => setLightboxIndex(-1)}
+          on={{
+            view: ({ index }) => setLightboxIndex(index),
+          }}
         />
       )}
     </div>

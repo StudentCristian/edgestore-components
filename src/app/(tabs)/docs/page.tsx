@@ -56,7 +56,7 @@ function DocsExample() {
       const response = await fetch('/api/files');
 
       if (!response.ok) {
-        throw new Error('Error fetching files');
+        throw new Error('Error al obtener archivos');
       }
 
       const data = await response.json();
@@ -103,13 +103,13 @@ function DocsExample() {
     try {
       // Only process .docx files
       if (!file.filename.toLowerCase().endsWith('.docx')) {
-        throw new Error('Only Word (.docx) documents are supported');
+        throw new Error('Solo se permiten documentos Word (.docx)');
       }
       
       // Fetch the document content
       const fileResponse = await fetch(file.url);
       if (!fileResponse.ok) {
-        throw new Error('Failed to download the document');
+        throw new Error('Error al descargar el documento');
       }
       
       // Get the file as blob and create FormData
@@ -125,7 +125,7 @@ function DocsExample() {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to detect placeholders');
+        throw new Error(errorData.error || 'Error al detectar campos');
       }
       
       const { placeholders } = await response.json();
@@ -139,7 +139,7 @@ function DocsExample() {
       setDocumentTags(tags);
     } catch (error) {
       console.error('Error processing document:', error);
-      setProcessingError(error instanceof Error ? error.message : 'Unknown error processing document');
+      setProcessingError(error instanceof Error ? error.message : 'Error desconocido al procesar documento');
     } finally {
       setIsProcessing(false);
     }
@@ -166,7 +166,7 @@ function DocsExample() {
               }
             >
               <UploadCloudIcon className="h-4 w-4" />
-              <span>{isUploading ? 'Uploading...' : 'Upload Files'}</span>
+              <span>{isUploading ? 'Subiendo...' : 'Subir Archivos'}</span>
             </Button>
 
             <CompletedFiles />
@@ -195,14 +195,14 @@ function DocsExample() {
                 documentTags={documentTags}
                 onGenerateStart={() => {
                   toast({
-                    title: "Generating document...",
-                    description: "Please wait while your document is being generated."
+                    title: "Generando documento...",
+                    description: "Por favor espera mientras se genera tu documento."
                   });
                 }}
                 onGenerateComplete={(url, filename) => {
                   toast({
-                    title: "Document generated successfully!",
-                    description: `Your document '${filename}' has been downloaded.`,
+                    title: "¡Documento generado!",
+                    description: `Tu documento '${filename}' se ha descargado.`,
                     variant: "success"
                   });
                   setGeneratedDocs(prev => [
@@ -212,7 +212,7 @@ function DocsExample() {
                 }}
                 onGenerateError={(error) => {
                   toast({
-                    title: "Error generating document",
+                    title: "Error al generar documento",
                     description: error,
                     variant: "destructive"
                   });
@@ -239,7 +239,7 @@ function CompletedFiles() {
 
   return (
     <div className="mt-8 w-full">
-      <h3 className="mb-2 text-lg font-semibold">Uploaded Files</h3>
+      <h3 className="mb-2 text-lg font-semibold">Archivos Subidos</h3>
       <div className="rounded-md bg-gray-50 p-4 dark:bg-gray-900">
         {completedFiles.map((res) => (
           <a
@@ -275,7 +275,7 @@ function StoredFilesWithSelection({
     return (
       <div className="mt-8 w-full">
         <div className="flex items-center justify-between">
-          <h3 className="mb-2 text-lg font-semibold">Stored Files</h3>
+          <h3 className="mb-2 text-lg font-semibold">Archivos Guardados</h3>
           <Button
             variant="ghost"
             size="sm"
@@ -286,7 +286,7 @@ function StoredFilesWithSelection({
           </Button>
         </div>
         <div className="rounded-md bg-gray-50 p-4 dark:bg-gray-900">
-          <p className="text-muted-foreground">Loading files...</p>
+          <p className="text-muted-foreground">Cargando archivos...</p>
         </div>
       </div>
     );
@@ -296,7 +296,7 @@ function StoredFilesWithSelection({
     return (
       <div className="mt-8 w-full">
         <div className="flex items-center justify-between">
-          <h3 className="mb-2 text-lg font-semibold">Stored Files</h3>
+          <h3 className="mb-2 text-lg font-semibold">Archivos Guardados</h3>
           <Button
             variant="ghost"
             size="sm"
@@ -306,7 +306,7 @@ function StoredFilesWithSelection({
           </Button>
         </div>
         <div className="rounded-md bg-gray-50 p-4 dark:bg-gray-900">
-          <p className="text-muted-foreground">No stored files</p>
+          <p className="text-muted-foreground">No hay archivos guardados</p>
         </div>
       </div>
     );
@@ -315,7 +315,7 @@ function StoredFilesWithSelection({
   return (
     <div className="mt-8 w-full">
       <div className="flex items-center justify-between">
-        <h3 className="mb-2 text-lg font-semibold">Stored Files</h3>
+        <h3 className="mb-2 text-lg font-semibold">Archivos Guardados</h3>
         <Button
           variant="ghost"
           size="sm"
@@ -338,7 +338,7 @@ function StoredFilesWithSelection({
                 size="sm"
                 onClick={() => onFileSelect(file)}
                 className="p-1"
-                title="Extract Tags"
+                title="Extraer Campos"
               >
                 <TagIcon className="h-4 w-4" />
               </Button>
@@ -379,10 +379,10 @@ function DocumentTagsDisplay({
 
   return (
     <div className="mt-8 w-full">
-      <h3 className="mb-2 text-lg font-semibold">Document Tags</h3>
+      <h3 className="mb-2 text-lg font-semibold">Campos del Documento</h3>
       <div className="rounded-md bg-gray-50 p-4 dark:bg-gray-900">
         {isProcessing && (
-          <p className="text-muted-foreground">Processing document...</p>
+          <p className="text-muted-foreground">Procesando documento...</p>
         )}
         
         {error && (
@@ -392,12 +392,12 @@ function DocumentTagsDisplay({
         )}
         
         {tags && Object.keys(tags).length === 0 && !isProcessing && !error && (
-          <p className="text-muted-foreground">No tags found in document.</p>
+          <p className="text-muted-foreground">No se encontraron campos en el documento.</p>
         )}
         
         {tags && Object.keys(tags).length > 0 && (
           <div>
-            <h4 className="mb-2 font-medium">Placeholders found in {selectedFile.filename}:</h4>
+            <h4 className="mb-2 font-medium">Campos encontrados en {selectedFile.filename}:</h4>
             <ul className="list-disc pl-5">
               {Object.keys(tags).map((tag) => (
                 <li key={tag} className="mb-1">
@@ -417,7 +417,7 @@ function DocumentTagsDisplay({
 function DocsDetails() {
   return (
     <div className="flex flex-col">
-      <h3 className="mt-4 text-base font-bold">Document Generation System</h3>
+      <h3 className="mt-4 text-base font-bold">Sistema de Generación de Documentos</h3>
       <ul className="text-sm text-foreground/80">
         <li>
           <a
@@ -426,22 +426,22 @@ function DocsDetails() {
             rel="noreferrer"
             className="underline"
           >
-            Docxtemplater Documentation
+            Documentación de Docxtemplater
           </a>
         </li>
       </ul>
-      <h3 className="mt-4 text-base font-bold">About</h3>
+      <h3 className="mt-4 text-base font-bold">Acerca de</h3>
       <div className="flex flex-col gap-2 text-sm text-foreground/80">
         <p>
-          This system allows you to upload .docx template files, extract placeholders, and fill them
-          with your data to generate customized documents.
+          Este sistema permite subir plantillas .docx, extraer los campos, y completarlos
+          con tus datos para generar documentos personalizados.
         </p>
         <p>
-          Upload a document template, select it from the stored files list, and fill in the form
-          to replace all placeholders with your content.
+          Sube una plantilla, selecciónala de la lista de archivos guardados, y completa el formulario
+          para reemplazar todos los campos con tu contenido.
         </p>
         <p>
-          You can toggle between direct data input and AI-generated content for each field in the form.
+          Puedes alternar entre ingresar datos directamente o usar contenido generado por IA para cada campo.
         </p>
       </div>
     </div>

@@ -266,14 +266,14 @@ export function UploaderProvider<TOptions = unknown>({
               updateFileState(fileState.key, {
                 status: 'PENDING',
                 progress: 0,
-                error: 'Upload canceled',
+                error: 'Subida cancelada',
               });
             } else {
               if (process.env.NODE_ENV === 'development') {
                 console.error(err);
               }
               const errorMessage =
-                err instanceof Error ? err.message : 'Upload failed';
+                err instanceof Error ? err.message : 'Error al subir archivo';
               updateFileState(fileState.key, {
                 status: 'ERROR',
                 error: errorMessage,

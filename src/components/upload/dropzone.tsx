@@ -64,8 +64,8 @@ const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
       dropzoneOptions,
       className,
       disabled,
-      dropMessageActive = 'Drop files here...',
-      dropMessageDefault = 'drag & drop files here, or click to select',
+      dropMessageActive = 'Suelta los archivos aquí...',
+      dropMessageDefault = 'Arrastra archivos aquí o haz clic para seleccionar',
       ...props
     },
     ref,
@@ -96,14 +96,14 @@ const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
             const error = rejectedFiles[0].errors[0];
             const code = error.code;
             const messages: Record<string, string> = {
-              'file-too-large': `The file is too large. Max size is ${formatFileSize(
+              'file-too-large': `El archivo es demasiado grande. Tamaño máximo: ${formatFileSize(
                 maxSize ?? 0,
               )}.`,
-              'file-invalid-type': 'Invalid file type.',
-              'too-many-files': `You can only add ${
-                maxFiles ?? 'multiple'
-              } file(s).`,
-              default: 'The file is not supported.',
+              'file-invalid-type': 'Tipo de archivo no válido.',
+              'too-many-files': `Solo puedes agregar ${
+                maxFiles ?? 'varios'
+              } archivo(s).`,
+              default: 'El archivo no está soportado.',
             };
             setError(messages[code] ?? messages.default);
           }
@@ -118,7 +118,7 @@ const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           const remainingSlots = maxFiles - fileStates.length;
           // If adding all files would exceed the limit, reject them all
           if (acceptedFiles.length > remainingSlots) {
-            setError(`You can only add ${maxFiles} file(s).`);
+            setError(`Solo puedes agregar ${maxFiles} archivo(s).`);
             return;
           }
         }

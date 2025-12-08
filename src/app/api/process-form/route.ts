@@ -4,7 +4,7 @@ import TypeBuilder from '@/baml_client/type_builder';
 
 export async function POST(request: NextRequest) {
   try {
-    const { structuredData } = await request.json();
+    const { structuredData, mediaContext } = await request.json();
     
     // Separar campos de tipo "data" y "prompt"
     const dataFields = structuredData.data || {};
@@ -15,11 +15,20 @@ export async function POST(request: NextRequest) {
     }
     
     // ✅ Construir context_data con campos de tipo "data"
-    const contextData = Object.keys(dataFields).length > 0
+    let contextData = Object.keys(dataFields).length > 0
       ? Object.entries(dataFields)
           .map(([field, value]) => `${field}: ${value}`)
           .join('\n')
       : 'Sin información de contexto adicional';
+    
+    // ✅ Agregar contexto de media seleccionada (ahora viene como markdown string)
+    if (mediaContext && typeof mediaContext === 'string' && mediaContext.trim()) {
+      contextData += '\n\n=== RECURSOS MULTIMEDIA SELECCIONADOS ===\n';
+      contextData += 'Los siguientes recursos están en formato Markdown. Úsalos para enriquecer el contenido:\n\n';
+      contextData += mediaContext;
+      contextData += '\n\nIMPORTANTE: Incluye estos recursos multimedia en el contenido generado cuando sea relevante. ';
+      contextData += 'Las imágenes usan formato ![título](url) y los videos usan formato [![título](thumbnail)](url_video).';
+    }
     
     // ✅ Construir fields_data con los VALORES REALES del formulario
     const fieldsData = Object.entries(promptFields)

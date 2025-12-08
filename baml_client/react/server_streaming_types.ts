@@ -32,4 +32,4 @@ export type StreamingServerTypes = {
   ProcessForm: DynamicFields,
   SearchImages: ImageResult[],
   SearchVideos: VideoResult[],
-}
+}

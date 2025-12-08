@@ -45,13 +45,13 @@ export default function SearchVideos({ useAI = true }: SearchVideosProps) {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search for videos..."
+          placeholder="Buscar videos..."
           onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           className="flex-1"
         />
         <Button onClick={handleSearch} disabled={isLoading}>
           <Search className="h-4 w-4 mr-2" />
-          Search
+          Buscar
         </Button>
       </div>
 
@@ -61,7 +61,7 @@ export default function SearchVideos({ useAI = true }: SearchVideosProps) {
         isLoading={isLoading}
         initialVisible={3}
         skeletonCount={4}
-        emptyMessage={searchedQuery ? `No videos found for "${searchedQuery}"` : undefined}
+        emptyMessage={searchedQuery ? `No se encontraron videos para "${searchedQuery}"` : undefined}
       />
     </div>
   );
