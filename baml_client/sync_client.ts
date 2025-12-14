@@ -22,7 +22,7 @@ import type { BamlRuntime, FunctionResult, BamlCtxManager, Image, Audio, Pdf, Vi
 import { toBamlError, BamlAbortError, type HTTPRequest } from "@boundaryml/baml"
 import type { Checked, Check, RecursivePartialNull as MovedRecursivePartialNull } from "./types"
 import type * as types from "./types"
-import type {DynamicFields, ImageResult, Message, Resume, VideoResult, WebSearchResult, WebSearchTool} from "./types"
+import type {CurriculumData, CurriculumRow, DynamicFields, ImageResult, Message, PdfKnowledge, Resume, VideoResult, WebSearchResult, WebSearchTool} from "./types"
 import type TypeBuilder from "./type_builder"
 import { HttpRequest, HttpStreamRequest } from "./sync_request"
 import { LlmResponseParser, LlmStreamParser } from "./parser"
@@ -138,6 +138,90 @@ export class BamlSyncClient {
     }
   }
   
+  ExtractCurriculumData(
+      curriculum_content: string,grado: string,periodo: string,tema: string,
+      __baml_options__?: BamlCallOptions<never>
+  ): string {
+    try {
+      const options = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+      const signal = options.signal;
+
+      if (signal?.aborted) {
+        throw new BamlAbortError('Operation was aborted', signal.reason);
+      }
+
+      // Check if onTick is provided and reject for sync operations
+      if (options.onTick) {
+        throw new Error("onTick is not supported for synchronous functions. Please use the async client instead.");
+      }
+
+      const collector = options.collector ? (Array.isArray(options.collector) ? options.collector : [options.collector]) : [];
+      const rawEnv = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const env: Record<string, string> = Object.fromEntries(
+        Object.entries(rawEnv).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      const raw = this.runtime.callFunctionSync(
+        "ExtractCurriculumData",
+        {
+          "curriculum_content": curriculum_content,"grado": grado,"periodo": periodo,"tema": tema
+        },
+        this.ctxManager.cloneContext(),
+        options.tb?.__tb(),
+        options.clientRegistry,
+        collector,
+        options.tags || {},
+        env,
+        signal,
+        options.watchers,
+      )
+      return raw.parsed(false) as string
+    } catch (error: any) {
+      throw toBamlError(error);
+    }
+  }
+  
+  ExtractPdfKnowledge(
+      pdf: Image,
+      __baml_options__?: BamlCallOptions<never>
+  ): string {
+    try {
+      const options = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+      const signal = options.signal;
+
+      if (signal?.aborted) {
+        throw new BamlAbortError('Operation was aborted', signal.reason);
+      }
+
+      // Check if onTick is provided and reject for sync operations
+      if (options.onTick) {
+        throw new Error("onTick is not supported for synchronous functions. Please use the async client instead.");
+      }
+
+      const collector = options.collector ? (Array.isArray(options.collector) ? options.collector : [options.collector]) : [];
+      const rawEnv = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const env: Record<string, string> = Object.fromEntries(
+        Object.entries(rawEnv).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      const raw = this.runtime.callFunctionSync(
+        "ExtractPdfKnowledge",
+        {
+          "pdf": pdf
+        },
+        this.ctxManager.cloneContext(),
+        options.tb?.__tb(),
+        options.clientRegistry,
+        collector,
+        options.tags || {},
+        env,
+        signal,
+        options.watchers,
+      )
+      return raw.parsed(false) as string
+    } catch (error: any) {
+      throw toBamlError(error);
+    }
+  }
+  
   ExtractResume(
       resume: string,
       __baml_options__?: BamlCallOptions<never>
@@ -181,7 +265,7 @@ export class BamlSyncClient {
   }
   
   ProcessForm(
-      context_data: string,fields_data: string,
+      context_data: string,fields_data: string,media_context?: string | null,
       __baml_options__?: BamlCallOptions<never>
   ): types.DynamicFields {
     try {
@@ -205,7 +289,49 @@ export class BamlSyncClient {
       const raw = this.runtime.callFunctionSync(
         "ProcessForm",
         {
-          "context_data": context_data,"fields_data": fields_data
+          "context_data": context_data,"fields_data": fields_data,"media_context": media_context?? null
+        },
+        this.ctxManager.cloneContext(),
+        options.tb?.__tb(),
+        options.clientRegistry,
+        collector,
+        options.tags || {},
+        env,
+        signal,
+        options.watchers,
+      )
+      return raw.parsed(false) as types.DynamicFields
+    } catch (error: any) {
+      throw toBamlError(error);
+    }
+  }
+  
+  ProcessFormWithRAG(
+      form_data: string,prompts: string,pdf_content: string,curriculum_content: string,media_context?: string | null,
+      __baml_options__?: BamlCallOptions<never>
+  ): types.DynamicFields {
+    try {
+      const options = { ...this.bamlOptions, ...(__baml_options__ || {}) }
+      const signal = options.signal;
+
+      if (signal?.aborted) {
+        throw new BamlAbortError('Operation was aborted', signal.reason);
+      }
+
+      // Check if onTick is provided and reject for sync operations
+      if (options.onTick) {
+        throw new Error("onTick is not supported for synchronous functions. Please use the async client instead.");
+      }
+
+      const collector = options.collector ? (Array.isArray(options.collector) ? options.collector : [options.collector]) : [];
+      const rawEnv = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const env: Record<string, string> = Object.fromEntries(
+        Object.entries(rawEnv).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      const raw = this.runtime.callFunctionSync(
+        "ProcessFormWithRAG",
+        {
+          "form_data": form_data,"prompts": prompts,"pdf_content": pdf_content,"curriculum_content": curriculum_content,"media_context": media_context?? null
         },
         this.ctxManager.cloneContext(),
         options.tb?.__tb(),

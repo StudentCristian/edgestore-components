@@ -47,6 +47,22 @@ export function all_succeeded<CheckName extends string>(checks: Record<CheckName
 export function get_checks<CheckName extends string>(checks: Record<CheckName, Check>): Check[] {
     return Object.values(checks)
 }
+export interface CurriculumData {
+  rows: CurriculumRow[]
+  
+}
+
+export interface CurriculumRow {
+  grado: string
+  periodo: string
+  area: string
+  contenidos_tematicos: string
+  evidencias_del_dba: string
+  estandar_basico_competencia: string
+  indicador_desempeno: string
+  
+}
+
 export interface DynamicFields {
   
   [key: string]: any;
@@ -62,6 +78,14 @@ export interface ImageResult {
 export interface Message {
   role: string
   content: string
+  
+}
+
+export interface PdfKnowledge {
+  title: string
+  content: string
+  competencias: string[]
+  estandares: string[]
   
 }
 

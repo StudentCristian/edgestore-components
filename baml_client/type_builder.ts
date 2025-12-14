@@ -27,11 +27,17 @@ export { FieldType, EnumBuilder, ClassBuilder }
 export default class TypeBuilder {
     private tb: _TypeBuilder;
     
+    CurriculumData: ClassViewer<'CurriculumData', "rows">;
+    
+    CurriculumRow: ClassViewer<'CurriculumRow', "grado" | "periodo" | "area" | "contenidos_tematicos" | "evidencias_del_dba" | "estandar_basico_competencia" | "indicador_desempeno">;
+    
     DynamicFields: ClassBuilder<'DynamicFields'>;
     
     ImageResult: ClassViewer<'ImageResult', "img_src" | "url" | "title">;
     
     Message: ClassViewer<'Message', "role" | "content">;
+    
+    PdfKnowledge: ClassViewer<'PdfKnowledge', "title" | "content" | "competencias" | "estandares">;
     
     Resume: ClassViewer<'Resume', "markdown">;
     
@@ -46,13 +52,21 @@ export default class TypeBuilder {
     constructor() {
         this.tb = new _TypeBuilder({
           classes: new Set([
-            "DynamicFields","ImageResult","Message","Resume","VideoResult","WebSearchResult","WebSearchTool",
+            "CurriculumData","CurriculumRow","DynamicFields","ImageResult","Message","PdfKnowledge","Resume","VideoResult","WebSearchResult","WebSearchTool",
           ]),
           enums: new Set([
             
           ]),
           runtime: DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME
         });
+        
+        this.CurriculumData = this.tb.classViewer("CurriculumData", [
+          "rows",
+        ]);
+        
+        this.CurriculumRow = this.tb.classViewer("CurriculumRow", [
+          "grado","periodo","area","contenidos_tematicos","evidencias_del_dba","estandar_basico_competencia","indicador_desempeno",
+        ]);
         
         this.DynamicFields = this.tb.classBuilder("DynamicFields", [
           
@@ -64,6 +78,10 @@ export default class TypeBuilder {
         
         this.Message = this.tb.classViewer("Message", [
           "role","content",
+        ]);
+        
+        this.PdfKnowledge = this.tb.classViewer("PdfKnowledge", [
+          "title","content","competencias","estandares",
         ]);
         
         this.Resume = this.tb.classViewer("Resume", [

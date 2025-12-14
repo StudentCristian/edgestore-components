@@ -1,7 +1,6 @@
 // Learn more about clients at https://docs.boundaryml.com/docs/snippets/clients/overview
-
 client<llm> CustomGPT4o {
-  provider openai
+  provider "openai"
   options {
     model "gpt-4o"
     api_key env.OPENAI_API_KEY
@@ -9,7 +8,7 @@ client<llm> CustomGPT4o {
 }
 
 client<llm> CustomGPT4oMini {
-  provider openai
+  provider "openai"
   retry_policy Exponential
   options {
     model "gpt-4o-mini"
@@ -18,16 +17,15 @@ client<llm> CustomGPT4oMini {
 }
 
 client<llm> CustomSonnet {
-  provider anthropic
+  provider "anthropic"
   options {
     model "claude-3-5-sonnet-20241022"
     api_key env.ANTHROPIC_API_KEY
   }
 }
 
-
 client<llm> CustomHaiku {
-  provider anthropic
+  provider "anthropic"
   retry_policy Constant
   options {
     model "claude-3-haiku-20240307"
@@ -37,7 +35,7 @@ client<llm> CustomHaiku {
 
 // https://docs.boundaryml.com/docs/snippets/clients/round-robin
 client<llm> CustomFast {
-  provider round-robin
+  provider "round-robin"
   options {
     // This will alternate between the two clients
     strategy [CustomGPT4oMini, CustomHaiku]
@@ -46,15 +44,15 @@ client<llm> CustomFast {
 
 // https://docs.boundaryml.com/docs/snippets/clients/fallback
 client<llm> OpenaiFallback {
-  provider fallback
+  provider "fallback"
   options {
     // This will try the clients in order until one succeeds
-    strategy [CustomGPT4oMini, CustomGPT4oMini]
+    strategy [CustomGPT4oMini, CustomGPT4o]
   }
 }
 
 // https://docs.boundaryml.com/docs/snippets/clients/retry
-retry_policy Constant { 
+retry_policy Constant {
   max_retries 3
   // Strategy is optional
   strategy {
@@ -74,13 +72,16 @@ retry_policy Exponential {
   }
 }
 
-client<llm> Gemini { 
-  provider google-ai
+client<llm> Gemini {
+  provider "google-ai"
   options {
-    model "gemini-2.5-flash-lite"
+    model "gemini-2.5-flash"
     api_key env.GOOGLE_API_KEY
+    media_url_handler {
+      pdf "send_base64"
+    }
     generationConfig {
-      max_output_tokens 8192          
+      max_output_tokens 8192
     }
   }
 }

@@ -22,7 +22,7 @@ import type { BamlRuntime, BamlCtxManager, ClientRegistry, Image, Audio, Pdf, Vi
 import { toBamlError, HTTPRequest } from "@boundaryml/baml"
 import type { Checked, Check } from "./types"
 import type * as types from "./types"
-import type {DynamicFields, ImageResult, Message, Resume, VideoResult, WebSearchResult, WebSearchTool} from "./types"
+import type {CurriculumData, CurriculumRow, DynamicFields, ImageResult, Message, PdfKnowledge, Resume, VideoResult, WebSearchResult, WebSearchTool} from "./types"
 import type TypeBuilder from "./type_builder"
 import type * as events from "./events"
 
@@ -62,6 +62,56 @@ export class HttpRequest {
     }
   }
   
+  ExtractCurriculumData(
+      curriculum_content: string,grado: string,periodo: string,tema: string,
+      __baml_options__?: BamlCallOptions<never>
+  ): HTTPRequest {
+    try {
+      const rawEnv = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const env: Record<string, string> = Object.fromEntries(
+        Object.entries(rawEnv).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.buildRequestSync(
+        "ExtractCurriculumData",
+        {
+          "curriculum_content": curriculum_content,"grado": grado,"periodo": periodo,"tema": tema
+        },
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        false,
+        env,
+      )
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
+  ExtractPdfKnowledge(
+      pdf: Image,
+      __baml_options__?: BamlCallOptions<never>
+  ): HTTPRequest {
+    try {
+      const rawEnv = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const env: Record<string, string> = Object.fromEntries(
+        Object.entries(rawEnv).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.buildRequestSync(
+        "ExtractPdfKnowledge",
+        {
+          "pdf": pdf
+        },
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        false,
+        env,
+      )
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
   ExtractResume(
       resume: string,
       __baml_options__?: BamlCallOptions<never>
@@ -88,7 +138,7 @@ export class HttpRequest {
   }
   
   ProcessForm(
-      context_data: string,fields_data: string,
+      context_data: string,fields_data: string,media_context?: string | null,
       __baml_options__?: BamlCallOptions<never>
   ): HTTPRequest {
     try {
@@ -99,7 +149,32 @@ export class HttpRequest {
       return this.runtime.buildRequestSync(
         "ProcessForm",
         {
-          "context_data": context_data,"fields_data": fields_data
+          "context_data": context_data,"fields_data": fields_data,"media_context": media_context?? null
+        },
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        false,
+        env,
+      )
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
+  ProcessFormWithRAG(
+      form_data: string,prompts: string,pdf_content: string,curriculum_content: string,media_context?: string | null,
+      __baml_options__?: BamlCallOptions<never>
+  ): HTTPRequest {
+    try {
+      const rawEnv = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const env: Record<string, string> = Object.fromEntries(
+        Object.entries(rawEnv).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.buildRequestSync(
+        "ProcessFormWithRAG",
+        {
+          "form_data": form_data,"prompts": prompts,"pdf_content": pdf_content,"curriculum_content": curriculum_content,"media_context": media_context?? null
         },
         this.ctxManager.cloneContext(),
         __baml_options__?.tb?.__tb(),
@@ -193,6 +268,56 @@ export class HttpStreamRequest {
     }
   }
   
+  ExtractCurriculumData(
+      curriculum_content: string,grado: string,periodo: string,tema: string,
+      __baml_options__?: BamlCallOptions<never>
+  ): HTTPRequest {
+    try {
+      const rawEnv = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const env: Record<string, string> = Object.fromEntries(
+        Object.entries(rawEnv).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.buildRequestSync(
+        "ExtractCurriculumData",
+        {
+          "curriculum_content": curriculum_content,"grado": grado,"periodo": periodo,"tema": tema
+        },
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        true,
+        env,
+      )
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
+  ExtractPdfKnowledge(
+      pdf: Image,
+      __baml_options__?: BamlCallOptions<never>
+  ): HTTPRequest {
+    try {
+      const rawEnv = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const env: Record<string, string> = Object.fromEntries(
+        Object.entries(rawEnv).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.buildRequestSync(
+        "ExtractPdfKnowledge",
+        {
+          "pdf": pdf
+        },
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        true,
+        env,
+      )
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
   ExtractResume(
       resume: string,
       __baml_options__?: BamlCallOptions<never>
@@ -219,7 +344,7 @@ export class HttpStreamRequest {
   }
   
   ProcessForm(
-      context_data: string,fields_data: string,
+      context_data: string,fields_data: string,media_context?: string | null,
       __baml_options__?: BamlCallOptions<never>
   ): HTTPRequest {
     try {
@@ -230,7 +355,32 @@ export class HttpStreamRequest {
       return this.runtime.buildRequestSync(
         "ProcessForm",
         {
-          "context_data": context_data,"fields_data": fields_data
+          "context_data": context_data,"fields_data": fields_data,"media_context": media_context?? null
+        },
+        this.ctxManager.cloneContext(),
+        __baml_options__?.tb?.__tb(),
+        __baml_options__?.clientRegistry,
+        true,
+        env,
+      )
+    } catch (error) {
+      throw toBamlError(error);
+    }
+  }
+  
+  ProcessFormWithRAG(
+      form_data: string,prompts: string,pdf_content: string,curriculum_content: string,media_context?: string | null,
+      __baml_options__?: BamlCallOptions<never>
+  ): HTTPRequest {
+    try {
+      const rawEnv = __baml_options__?.env ? { ...process.env, ...__baml_options__.env } : { ...process.env };
+      const env: Record<string, string> = Object.fromEntries(
+        Object.entries(rawEnv).filter(([_, value]) => value !== undefined) as [string, string][]
+      );
+      return this.runtime.buildRequestSync(
+        "ProcessFormWithRAG",
+        {
+          "form_data": form_data,"prompts": prompts,"pdf_content": pdf_content,"curriculum_content": curriculum_content,"media_context": media_context?? null
         },
         this.ctxManager.cloneContext(),
         __baml_options__?.tb?.__tb(),

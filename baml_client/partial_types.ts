@@ -20,7 +20,7 @@ $ pnpm add @boundaryml/baml
 
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml"
 import type { Checked, Check } from "./types"
-import type {  DynamicFields,  ImageResult,  Message,  Resume,  VideoResult,  WebSearchResult,  WebSearchTool } from "./types"
+import type {  CurriculumData,  CurriculumRow,  DynamicFields,  ImageResult,  Message,  PdfKnowledge,  Resume,  VideoResult,  WebSearchResult,  WebSearchTool } from "./types"
 import type * as types from "./types"
 
 /******************************************************************************
@@ -36,6 +36,18 @@ export interface StreamState<T> {
 }
 
 export namespace partial_types {
+    export interface CurriculumData {
+      rows: CurriculumRow[]
+    }
+    export interface CurriculumRow {
+      grado?: string | null
+      periodo?: string | null
+      area?: string | null
+      contenidos_tematicos?: string | null
+      evidencias_del_dba?: string | null
+      estandar_basico_competencia?: string | null
+      indicador_desempeno?: string | null
+    }
     export interface DynamicFields {
       [key: string]: any;
     }
@@ -47,6 +59,12 @@ export namespace partial_types {
     export interface Message {
       role?: string | null
       content?: string | null
+    }
+    export interface PdfKnowledge {
+      title?: string | null
+      content?: string | null
+      competencias: string[]
+      estandares: string[]
     }
     export interface Resume {
       markdown?: string | null

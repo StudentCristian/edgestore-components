@@ -24,7 +24,7 @@ import { b } from '../index';
 import type { Check, Checked  } from "../types";
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml";
 
-import type {  DynamicFields,  ImageResult,  Message,  Resume,  VideoResult,  WebSearchResult,  WebSearchTool } from "../types"
+import type {  CurriculumData,  CurriculumRow,  DynamicFields,  ImageResult,  Message,  PdfKnowledge,  Resume,  VideoResult,  WebSearchResult,  WebSearchTool } from "../types"
 
 import type * as types from "../types"
 
@@ -47,6 +47,53 @@ export const ExecuteWebSearch = async (
 ): Promise<ReadableStream<Uint8Array>> => {
   const stream = b.stream.ExecuteWebSearch(
     message,
+  );
+  return Promise.resolve(stream.toStreamable());
+};
+
+/**
+ * Executes the streaming variant of the "ExtractCurriculumData" BAML action.
+ *
+ * This action initiates a streaming response by calling the corresponding
+ * BAML stream function. The returned stream yields incremental updates.
+ *
+ * @param { string } curriculum_content - Input parameter.
+ * @param { string } grado - Input parameter.
+ * @param { string } periodo - Input parameter.
+ * @param { string } tema - Input parameter.
+ *
+ * @returns {ReadableStream<Uint8Array>} A stream that yields incremental updates from the action.
+ */
+export const ExtractCurriculumData = async (
+  curriculum_content: string,
+  grado: string,
+  periodo: string,
+  tema: string,
+): Promise<ReadableStream<Uint8Array>> => {
+  const stream = b.stream.ExtractCurriculumData(
+    curriculum_content,
+    grado,
+    periodo,
+    tema,
+  );
+  return Promise.resolve(stream.toStreamable());
+};
+
+/**
+ * Executes the streaming variant of the "ExtractPdfKnowledge" BAML action.
+ *
+ * This action initiates a streaming response by calling the corresponding
+ * BAML stream function. The returned stream yields incremental updates.
+ *
+ * @param { Image } pdf - Input parameter.
+ *
+ * @returns {ReadableStream<Uint8Array>} A stream that yields incremental updates from the action.
+ */
+export const ExtractPdfKnowledge = async (
+  pdf: Image,
+): Promise<ReadableStream<Uint8Array>> => {
+  const stream = b.stream.ExtractPdfKnowledge(
+    pdf,
   );
   return Promise.resolve(stream.toStreamable());
 };
@@ -78,16 +125,50 @@ export const ExtractResume = async (
  *
  * @param { string } context_data - Input parameter.
  * @param { string } fields_data - Input parameter.
+ * @param { string | null } media_context (optional) - Input parameter.
  *
  * @returns {ReadableStream<Uint8Array>} A stream that yields incremental updates from the action.
  */
 export const ProcessForm = async (
   context_data: string,
   fields_data: string,
+  media_context?: string | null,
 ): Promise<ReadableStream<Uint8Array>> => {
   const stream = b.stream.ProcessForm(
     context_data,
     fields_data,
+    media_context,
+  );
+  return Promise.resolve(stream.toStreamable());
+};
+
+/**
+ * Executes the streaming variant of the "ProcessFormWithRAG" BAML action.
+ *
+ * This action initiates a streaming response by calling the corresponding
+ * BAML stream function. The returned stream yields incremental updates.
+ *
+ * @param { string } form_data - Input parameter.
+ * @param { string } prompts - Input parameter.
+ * @param { string } pdf_content - Input parameter.
+ * @param { string } curriculum_content - Input parameter.
+ * @param { string | null } media_context (optional) - Input parameter.
+ *
+ * @returns {ReadableStream<Uint8Array>} A stream that yields incremental updates from the action.
+ */
+export const ProcessFormWithRAG = async (
+  form_data: string,
+  prompts: string,
+  pdf_content: string,
+  curriculum_content: string,
+  media_context?: string | null,
+): Promise<ReadableStream<Uint8Array>> => {
+  const stream = b.stream.ProcessFormWithRAG(
+    form_data,
+    prompts,
+    pdf_content,
+    curriculum_content,
+    media_context,
   );
   return Promise.resolve(stream.toStreamable());
 };

@@ -24,7 +24,7 @@ import { b } from '../index';
 import type { Check, Checked  } from "../types";
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml";
 
-import type {  DynamicFields,  ImageResult,  Message,  Resume,  VideoResult,  WebSearchResult,  WebSearchTool } from "../types"
+import type {  CurriculumData,  CurriculumRow,  DynamicFields,  ImageResult,  Message,  PdfKnowledge,  Resume,  VideoResult,  WebSearchResult,  WebSearchTool } from "../types"
 
 import type * as types from "../types"
 
@@ -47,6 +47,51 @@ export const ExecuteWebSearch = async (
 ): Promise<types.WebSearchTool> => {
   return b.ExecuteWebSearch(
     message,
+  );
+};
+
+/**
+ * Executes the "ExtractCurriculumData" BAML action.
+ *
+ * This server action calls the underlying BAML function "ExtractCurriculumData"
+ * with the specified parameters.
+ *
+ * @param { string } curriculum_content - Input parameter.
+ * @param { string } grado - Input parameter.
+ * @param { string } periodo - Input parameter.
+ * @param { string } tema - Input parameter.
+ *
+ * @returns {Promise<string>} A promise that resolves with the result of the action.
+ */
+export const ExtractCurriculumData = async (
+  curriculum_content: string,
+  grado: string,
+  periodo: string,
+  tema: string,
+): Promise<string> => {
+  return b.ExtractCurriculumData(
+    curriculum_content,
+    grado,
+    periodo,
+    tema,
+  );
+};
+
+/**
+ * Executes the "ExtractPdfKnowledge" BAML action.
+ *
+ * This server action calls the underlying BAML function "ExtractPdfKnowledge"
+ * with the specified parameters.
+ *
+ * @param { Image } pdf - Input parameter.
+ *
+ * @returns {Promise<string>} A promise that resolves with the result of the action.
+ */
+export const ExtractPdfKnowledge = async (
+  pdf: Image,
+): Promise<string> => {
+  return b.ExtractPdfKnowledge(
+    pdf,
   );
 };
 
@@ -76,16 +121,49 @@ export const ExtractResume = async (
  *
  * @param { string } context_data - Input parameter.
  * @param { string } fields_data - Input parameter.
+ * @param { string | null } media_context (optional) - Input parameter.
  *
  * @returns {Promise<types.DynamicFields>} A promise that resolves with the result of the action.
  */
 export const ProcessForm = async (
   context_data: string,
   fields_data: string,
+  media_context?: string | null,
 ): Promise<types.DynamicFields> => {
   return b.ProcessForm(
     context_data,
     fields_data,
+    media_context,
+  );
+};
+
+/**
+ * Executes the "ProcessFormWithRAG" BAML action.
+ *
+ * This server action calls the underlying BAML function "ProcessFormWithRAG"
+ * with the specified parameters.
+ *
+ * @param { string } form_data - Input parameter.
+ * @param { string } prompts - Input parameter.
+ * @param { string } pdf_content - Input parameter.
+ * @param { string } curriculum_content - Input parameter.
+ * @param { string | null } media_context (optional) - Input parameter.
+ *
+ * @returns {Promise<types.DynamicFields>} A promise that resolves with the result of the action.
+ */
+export const ProcessFormWithRAG = async (
+  form_data: string,
+  prompts: string,
+  pdf_content: string,
+  curriculum_content: string,
+  media_context?: string | null,
+): Promise<types.DynamicFields> => {
+  return b.ProcessFormWithRAG(
+    form_data,
+    prompts,
+    pdf_content,
+    curriculum_content,
+    media_context,
   );
 };
 
